@@ -1,8 +1,8 @@
-# Dash Uber Rides Demo
+# Craga de pasajeros Dashboard
 
 ## About this app
 
-This is a demo of the Dash interactive Python framework developed by [Plotly](https://plot.ly/).
+
 
 ## How to run this app
 
