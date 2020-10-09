@@ -1,4 +1,4 @@
-# Craga de pasajeros Dashboard
+# Carga de pasajeros Dashboard
 
 ## About this app
 
