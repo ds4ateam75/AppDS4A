@@ -267,6 +267,7 @@ body {
 
 .banner h5 {
   font-family: 'Open Sans Semi Bold', sans-serif;
+  color: white;
   font-weight: 500;
   line-height: 1.2;
   font-size: 2rem;
@@ -275,8 +276,10 @@ body {
 }
 
 .banner h6 {
+  color: white;
   font-size: 1.6rem;
   line-height: 1;
+  margin-left: 10%;
 }
 
 .banner button {
@@ -350,6 +353,7 @@ body {
 
 #tabs {
   width: 100%;
+  color: white;
 }
 
 .custom-tabs {
@@ -376,6 +380,7 @@ body {
 }
 
 #Specs-tab.custom-tab--selected, #Control-chart-tab.custom-tab--selected {
+  color:#006c9e;
   border-bottom: #006c9e solid 4px !important;
 }
 
