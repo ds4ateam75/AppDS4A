@@ -14,6 +14,7 @@ from datetime import datetime as dt
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
 )
+app.title = 'My app'
 server = app.server
 
 
