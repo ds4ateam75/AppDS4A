@@ -99,7 +99,7 @@ def build_banner():
                 children = [
                     html.Button(
                         id = 'Description-button',
-                        children = 'Descripcion',
+                        children = 'Información',
                         n_clicks = 0
                         ),
                     html.A([
@@ -126,14 +126,14 @@ def build_tabs():
                 children=[
                     dcc.Tab(
                         id="Specs-tab",
-                        label="Descripcion",
+                        label="Descripción",
                         value="tab1",
                         className="custom-tab",
                         selected_className="custom-tab--selected",
                     ),
                     dcc.Tab(
                         id="Control-chart-tab",
-                        label="Prediccion",
+                        label="Predicción",
                         value="tab2",
                         className="custom-tab",
                         selected_className="custom-tab--selected",
