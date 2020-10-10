@@ -142,118 +142,9 @@ def build_banner():
     )
 
 
-def build_tabs():
-    return html.Div(
-        id="tabs",
-        className="tabs",
-        children=[
-            dcc.Tabs(
-                id="app-tabs",
-                value="tab2",
-                className="custom-tabs",
-                children=[
-                    dcc.Tab(
-                        id="Specs-tab",
-                        label="Specification Settings",
-                        value="tab1",
-                        className="custom-tab",
-                        selected_className="custom-tab--selected",
-                    ),
-                    dcc.Tab(
-                        id="Control-chart-tab",
-                        label="Control Charts Dashboard",
-                        value="tab2",
-                        className="custom-tab",
-                        selected_className="custom-tab--selected",
-                    ),
-                ],
-            )
-        ],
-    )
-
-
-def build_tab_1():
-    return(
-    html.Div(
-            className="row",
-            children=[
-                # Column for user controls
-                html.Div(
-                    className="four columns div-user-controls",
-                    children=[
-                        html.Div(
-                            className="div-for-dropdown",
-                            children=[
-                                dcc.DatePickerSingle(
-                                    id="date-picker",
-                                    min_date_allowed=dt(2014, 4, 1),
-                                    max_date_allowed=dt(2014, 9, 30),
-                                    initial_visible_month=dt(2014, 4, 1),
-                                    date=dt(2014, 4, 1).date(),
-                                    display_format="MMMM D, YYYY",
-                                )
-                            ],
-                        ),
-                        # Change to side-by-side for mobile layout
-                        html.Div(
-                            className="row",
-                            children=[
-                                html.Div(
-                                    className="div-for-dropdown",
-                                    children=[
-                                        # Dropdown for locations on map
-                                        dcc.Dropdown(
-                                            id="location-dropdown",
-                                            options=[
-                                                {"label": i, "value": i}
-                                                for i in list_of_locations
-                                            ],
-                                            placeholder="Select a location",
-                                        )
-                                    ],
-                                ),
-                                html.Div(
-                                    className="div-for-dropdown",
-                                    children=[
-                                        # Dropdown to select times
-                                        dcc.Dropdown(
-                                            id="bar-selector",
-                                            options=[
-                                                {
-                                                    "label": str(n) + ":00",
-                                                    "value": str(n),
-                                                }
-                                                for n in range(24)
-                                            ],
-                                            multi=True,
-                                            placeholder="Select certain hours",
-                                        )
-                                    ],
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
-                # Column for app graphs and plots
-                html.Div(
-                    className="eight columns div-for-charts bg-grey",
-                    children=[
-                        dcc.Graph(id="map-graph"),
-                        html.Div(
-                            className="text-padding",
-                            children=[
-                                "Select any of the bars on the histogram to section data by time."
-                            ],
-                        ),
-                        dcc.Graph(id="histogram"),
-                    ],
-                ),
-            ],
-        ),
-    )
-
-
 def generate_modal():
+    """This function create the pop-up window that is display when
+    learn more button is clicked"""
     return html.Div(
         id="markdown",
         className="modal",
@@ -300,6 +191,148 @@ def generate_modal():
     )
 
 
+def build_tabs():
+    return html.Div(
+        id="tabs",
+        className="tabs",
+        children=[
+            dcc.Tabs(
+                id="app-tabs",
+                value="tab2",
+                className="custom-tabs",
+                children=[
+                    dcc.Tab(
+                        id="Specs-tab",
+                        label="Análisis historico",
+                        value="tab1",
+                        className="custom-tab",
+                        selected_className="custom-tab--selected",
+                    ),
+                    dcc.Tab(
+                        id="Control-chart-tab",
+                        label="Análisis predictivo",
+                        value="tab2",
+                        className="custom-tab",
+                        selected_className="custom-tab--selected",
+                    ),
+                ],
+            )
+        ],
+    )
+
+
+def build_dropdown(placeholder, idName, optionsList):
+    return (
+                html.Div(
+                    className="row",
+                    children=[
+                        html.Div(
+                            className="div-for-dropdown",
+                            children=[
+                                # Dropdown for locations on map
+                                dcc.Dropdown(
+                                    id=idName,
+                                    options=[
+                                        {"label": i, "value": i}
+                                        for i in optionsList
+                                    ],
+                                    placeholder=placeholder,
+                                )
+                            ],
+                        ),
+                        ],
+                    )
+                )
+
+
+def build_date_picker(idName):
+    return(
+            html.Div(
+                className="div-for-dropdown",
+                children=[
+                    dcc.DatePickerSingle(
+                        id=idName,
+                        min_date_allowed=dt(2014, 4, 1),
+                        max_date_allowed=dt(2014, 9, 30),
+                        initial_visible_month=dt(2014, 4, 1),
+                        date=dt(2014, 4, 1).date(),
+                        display_format="MMMM D, YYYY",
+                    )
+                ],
+            )
+    )
+
+
+def build_tab_1():
+    return(
+    html.Div(
+            className="row",
+            children=[
+                # Column for user controls
+                html.Div(
+                    className="four columns div-user-controls",
+                    children=[
+                        build_date_picker("date-picker"),
+                        build_date_picker("date-picker"),
+                        # Change to side-by-side for mobile layout
+                        html.Div(
+                            className="row",
+                            children=[
+                                build_dropdown("Periodo de agrupacion",
+                                                "location-dropdown",
+                                                ['Hora','Día','Mes']),
+                                html.Div(
+                                    className="div-for-dropdown",
+                                    children=[
+                                        # Dropdown to select times
+                                        dcc.Dropdown(
+                                            id="bar-selector",
+                                            options=[
+                                                {
+                                                    "label": str(n) + ":00",
+                                                    "value": str(n),
+                                                }
+                                                for n in range(24)
+                                            ],
+                                            multi=True,
+                                            placeholder="Select certain hours",
+                                        )
+                                    ],
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                # Column for app graphs and plots
+                html.Div(
+                    className="eight columns div-for-charts bg-grey",
+                    children=[
+                        dcc.Graph(id="map-graph"),
+                        html.Div(
+                            className="text-padding",
+                            children=[
+                                "Select any of the bars on the histogram to section data by time."
+                            ],
+                        ),
+                        dcc.Graph(id="histogram"),
+                    ],
+                ),
+            ],
+        ),
+    )
+
+
+def build_tab_2():
+    return(
+            html.Div(
+                    id="banner-text",
+                    children=[
+                        html.H6("LOADING..."),
+                    ],
+                ),
+        )
+
+
 # ======= Callbacks for modal popup =======
 @app.callback(
     Output("markdown", "style"),
@@ -315,23 +348,18 @@ def update_click_output(button_click, close_click):
 
     return {"display": "none"}
 
+
 @app.callback(
     [Output("app-content", "children")],
     [Input("app-tabs", "value")],
 )
 def render_tab_content(tab_switch):
     if tab_switch == "tab1":
-        return build_tab_1() 
-    return (
-            html.Div(
-                    id="banner-text",
-                    children=[
-                        html.H6("LOADING..."),
-                    ],
-                ),
-        )
+        return build_tab_1()
+    return build_tab_2()
 
-# Layout of Dash App
+
+"""Layout of Dash App"""
 app.layout = html.Div(
     children=[
         build_banner(),
@@ -387,10 +415,10 @@ def update_histogram(datePicked, selection):
         barmode="group",
         margin=go.layout.Margin(l=10, r=0, t=0, b=50),
         showlegend=False,
-        plot_bgcolor="#323130",
-        paper_bgcolor="#323130",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
         dragmode="select",
-        font=dict(color="white"),
+        font=dict(color="black"),
         xaxis=dict(
             range=[-0.5, 23.5],
             showgrid=False,
@@ -414,7 +442,7 @@ def update_histogram(datePicked, selection):
                 xanchor="center",
                 yanchor="bottom",
                 showarrow=False,
-                font=dict(color="white"),
+                font=dict(color="black"),
             )
             for xi, yi in zip(xVal, yVal)
         ],
