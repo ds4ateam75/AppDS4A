@@ -31,9 +31,30 @@ df['fecha'] = df['fecha'].dt.strftime('%Y-%m-%d')
 Rutas = df['ruta'].astype('category').cat.categories.tolist() 
 
 
-colores = ["#F4EC15","#DAF017","#BBEC19","#9DE81B","#80E41D","#66E01F","#4CDC20","#34D822","#24D249","#25D042","#26CC58",
-    "#28C86D","#29C481","#2AC093","#2BBCA4","#2BB5B8","#2C99B4","#2D7EB0","#2D65AC","#2E4EA4","#2E38A4","#3B2FA0","#4E2F9C",
-    "#603099"]
+colores = [ "#548B54",
+            "#32CD32",
+            "#228B22",
+            "#00FF00",
+            "#00EE00",
+            "#00CD00",
+            "#008B00",
+            "#008000",
+            "#006400",
+            "#308014",
+            "#7CFC00",
+            "#7FFF00",
+            "#76EE00",
+            "#66CD00",
+            "#458B00",
+            "#ADFF2F",
+            "#CAFF70",
+            "#BCEE68",
+            "#A2CD5A",
+            "#6E8B3D",
+            "#556B2F",
+            "#6B8E23",
+            "#C0FF3E",
+            "#B3EE3A"]
 
 
 hour_label ={}
@@ -267,15 +288,13 @@ def build_tab_1():
     )
 
 
-
 def build_tab_2():
     return (
         html.Div(
-        id = 'tab2-content',
-        children = [html.H2('En Desarrollo...')]
-        ),
+                id = 'tab2-content',
+                children = [html.H2('En Desarrollo...')]
+            ),
         )
-
 
 
 @app.callback(
@@ -284,10 +303,9 @@ def build_tab_2():
 )
 def render_tab_content(tab_switch):
     if tab_switch == "tab1":
-        return build_tab_1() 
+        return build_tab_1()
     else:
         return build_tab_2()
-
 
 
 # Update Histogram Figure based on Month, Day and Times Chosen
@@ -295,29 +313,27 @@ def render_tab_content(tab_switch):
     Output("histogram", "figure"),
     [Input("date-picker", "date"), Input("location-dropdown", "value")],
     )
-
 def update_histogram(date_picked, route_selected):
     if date_picked in df['fecha'].tolist():
-        data = df[df['fecha']==date_picked]
+        data = df[df['fecha'] == date_picked]
     else:
         data = df
-        
+
     if route_selected:
-        data = data[data['ruta']==route_selected]
+        data = data[data['ruta'] == route_selected]
 
     xVal = []
     yVal = []
-    
+
     for hour in hour_label:
         if hour in data['hora']:
             xVal.append(hour)
-            yVal.append(int(data['carga'][data['hora']==hour].sum()))
-    
+            yVal.append(int(data['carga'][data['hora'] == hour].sum()))
+
     xVal = pd.Series(xVal)
     yVal = pd.Series(yVal)
-    
+
     colorVal = colores[:int(len(xVal))]
-   
 
     layout = go.Layout(
         bargap=0.01,
@@ -375,7 +391,6 @@ def update_histogram(date_picked, route_selected):
     )
 
 
-
 @app.callback(
     Output("map-graph", "figure"),
     [
@@ -384,21 +399,18 @@ def update_histogram(date_picked, route_selected):
     ],
 )
 def update_graph(date_picked, route_selected):
-    zoom = 12.0
+    zoom = 10.0
     latInitial = 6.2259489
     lonInitial = -75.6119972
     bearing = 0
-    
+
     data = df
-    
+
     if date_picked in df['fecha'].tolist():
-        data = df[df['fecha']==date_picked]
-    
-    
+        data = df[df['fecha'] == date_picked]
+
     if route_selected:
-        data = data[data['ruta']==route_selected]
-
-
+        data = data[data['ruta'] == route_selected]
 
     return go.Figure(
         data=[
@@ -499,20 +511,6 @@ def update_graph(date_picked, route_selected):
             ],
         ),
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Layout of Dash App
