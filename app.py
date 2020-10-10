@@ -3,7 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import numpy as np
-
+import os
+import pathlib
 from dash.dependencies import Input, Output
 from plotly import graph_objs as go
 from plotly.graph_objs import *
@@ -14,6 +15,8 @@ app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
 )
 server = app.server
+
+
 
 
 # Plotly mapbox public token
