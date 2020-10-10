@@ -341,10 +341,10 @@ def update_histogram(date_picked, route_selected):
         barmode="group",
         margin=go.layout.Margin(l=10, r=0, t=0, b=50),
         showlegend=False,
-        plot_bgcolor="#323130",
-        paper_bgcolor="#323130",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
         dragmode="select",
-        font=dict(color="white"),
+        font=dict(color="black"),
         xaxis=dict(
             range=[-0.5, 23.5],
             showgrid=False,
@@ -353,7 +353,7 @@ def update_histogram(date_picked, route_selected):
             ticksuffix=":00",
         ),
         yaxis=dict(
-#            range=[0, max(yVal) + max(yVal) / 4],
+        #   range=[0, max(yVal) + max(yVal) / 4],
             showticklabels=False,
             showgrid=False,
             fixedrange=True,
@@ -368,7 +368,7 @@ def update_histogram(date_picked, route_selected):
                 xanchor="center",
                 yanchor="bottom",
                 showarrow=False,
-                font=dict(color="white"),
+                font=dict(color="black"),
             )
             for xi, yi in zip(xVal, yVal)
         ],
