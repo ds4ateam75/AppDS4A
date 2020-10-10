@@ -265,6 +265,12 @@ def build_tab_1():
                                         )
                                     ],
                                 ),
+                                html.Img(
+                                    id = 'team-logo',
+                                    src = 'assets/team_img.jpeg',
+                                    style={'width':'100%'}
+                                    
+                                    )
                             ],
                         ),
                     ],
