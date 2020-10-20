@@ -189,6 +189,14 @@ def generate_modal():
         ),
     )
 
+def add_loads(df):
+
+    data = df.groupby(by=['latitud', 'longitud']).sum()
+    latitud, longitud = zip(*data.index.values)
+    data['latitud'] = latitud
+    data['longitud'] = longitud
+    return data
+
 
 @app.callback(
     Output("markdown", "style"),
@@ -205,9 +213,6 @@ def update_click_output(button_click, close_click):
     return {"display": "none"}
 
 
-
-
-
 def build_tab_1():
     return(
     html.Div(
@@ -217,16 +222,25 @@ def build_tab_1():
                 html.Div(
                     className="four columns div-user-controls",
                     children=[
+                        html.Button('Reset', id='reset-val', n_clicks=0),
+                        #html.Div(dcc.Checklist(
+                        #        id="all-data-picker",
+                        #        options=[
+                        #            {'label': 'Use all the data', 'value': 'all'}
+                        #        ],
+                        #        value=['all']
+                        #    )),
                         html.Div(
                             className="div-for-dropdown",
                             children=[html.P('Ingrese la fecha que desea revisar'),
-                                dcc.DatePickerSingle(
+                                dcc.DatePickerRange(
                                     id="date-picker",
-                                    min_date_allowed=dt(2019, 1, 1),
-                                    max_date_allowed=dt(2022, 1, 1),
+                                    min_date_allowed=df['fecha'].min(),
+                                    max_date_allowed=df['fecha'].max(),
                                     initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
-                                    date=dt(dt.now().year, dt.now().month, dt.now().day).date(),
+                                    end_date=dt(dt.now().year, dt.now().month, dt.now().day).date(),
                                     display_format="MMMM D, YYYY",
+                                    style={'backgroud': 'blue'},
                                 )
                             ],
                         ),
@@ -244,7 +258,9 @@ def build_tab_1():
                                                 {"label": ruta, "value": ruta}
                                                 for ruta in Rutas
                                             ],
+                                            multi=True,
                                             placeholder="Ruta",
+                                            searchable=True
                                         )
                                     ],
                                 ),
@@ -267,10 +283,9 @@ def build_tab_1():
                                     ],
                                 ),
                                 html.Img(
-                                    id = 'team-logo',
-                                    src = 'assets/team_img.jpeg',
-                                    style={'width':'100%'}
-                                    
+                                    id='team-logo',
+                                    src='assets/team_img.jpeg',
+                                    style={'width': '100%'}
                                     )
                             ],
                         ),
@@ -318,16 +333,21 @@ def render_tab_content(tab_switch):
 # Update Histogram Figure based on Month, Day and Times Chosen
 @app.callback(
     Output("histogram", "figure"),
-    [Input("date-picker", "date"), Input("location-dropdown", "value")],
+    [
+        Input("date-picker", "start_date"),
+        Input("date-picker", "end_date"),
+        Input("location-dropdown", "value")
+    ],
     )
-def update_histogram(date_picked, route_selected):
-    if date_picked in df['fecha'].tolist():
-        data = df[df['fecha'] == date_picked]
-    else:
-        data = df
+def update_histogram(start_date, end_date, route_selected):
+
+    data = df.copy()
+
+    if start_date and end_date:
+        data = df[(df['fecha'] >= start_date) & (df['fecha'] <= end_date)]
 
     if route_selected:
-        data = data[data['ruta'] == route_selected]
+        data = data[df['ruta'].apply(lambda x: x in route_selected)]
 
     xVal = []
     yVal = []
@@ -350,7 +370,7 @@ def update_histogram(date_picked, route_selected):
         showlegend=False,
         plot_bgcolor="white",
         paper_bgcolor="white",
-        dragmode="select",
+        #dragmode="select",
         font=dict(color="black"),
         xaxis=dict(
             range=[-0.5, 23.5],
@@ -397,34 +417,62 @@ def update_histogram(date_picked, route_selected):
         layout=layout,
     )
 
+@app.callback(
+        Output("date-picker", "start_date"),
+        Output("date-picker", "end_date"),
+        Output("location-dropdown", "value"),
+        Output("bar-selector", "value"),
+    [
+        Input("reset-val", "n_clicks"),
+    ],
+    )
+def use_all_data(n_clicks):
+
+    value = []
+    start_date = df['fecha'].min()
+    end_date = df['fecha'].max()
+    return start_date, end_date, value, value
+
+
 
 @app.callback(
     Output("map-graph", "figure"),
     [
-        Input("date-picker", "date"),
+        Input("date-picker", "start_date"),
+        Input("date-picker", "end_date"),
         Input("location-dropdown", "value"),
+        Input("bar-selector", "value")
     ],
 )
-def update_graph(date_picked, route_selected):
+def update_graph(start_date, end_date, route_selected, hour_picked):
     zoom = 10.0
     latInitial = 6.2259489
     lonInitial = -75.6119972
     bearing = 0
 
-    data = df
+    data = df.copy()
 
-    if date_picked in df['fecha'].tolist():
-        data = df[df['fecha'] == date_picked]
+    if start_date and end_date:
+        try:
+            data = data[(data['fecha'] >= start_date) & (data['fecha'] <= end_date)]
+        except:
+            pass
+        print(start_date)
 
     if route_selected:
-        data = data[data['ruta'] == route_selected]
+        data = data[data['ruta'].apply(lambda x: x in route_selected)]
+
+    if hour_picked:
+        data = data[data['hora'].apply(lambda x: float(x) in hour_picked)]
+
+    data = add_loads(data)
 
     return go.Figure(
         data=[
             # Data for all rides based on date and time
             Scattermapbox(
-                lat=data["latitud"],
-                lon=data["longitud"],
+                lat=data['latitud'],
+                lon=data['longitud'],
                 mode="markers",
                 hoverinfo="lat+lon+text",
                 text=data['hora'],
@@ -537,10 +585,16 @@ app.layout = html.Div(
         )
 
 
-
-
-
-
+# Selected Data in the Histogram updates the Values in the DatePicker
+#@app.callback(
+#    Output("bar-selector", "value"),
+#    [Input("histogram", "selectedData"), Input("histogram", "clickData")],
+#)
+#def update_bar_selector(value, clickData):
+#    holder = []
+#    if clickData:
+#        holder = [str(int(clickData["points"][0]["x"]))]
+#    return holder
 
 
 if __name__ == "__main__":
