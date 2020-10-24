@@ -21,7 +21,7 @@ from datetime import datetime as dt
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True
 )
-app.title = 'Favicon'
+app.title = 'AmvApp'
 server = app.server
 
 
@@ -223,16 +223,9 @@ def build_tab_1():
                     className="four columns div-user-controls",
                     children=[
                         html.Button('Reset', id='reset-val', n_clicks=0),
-                        #html.Div(dcc.Checklist(
-                        #        id="all-data-picker",
-                        #        options=[
-                        #            {'label': 'Use all the data', 'value': 'all'}
-                        #        ],
-                        #        value=['all']
-                        #    )),
                         html.Div(
                             className="div-for-dropdown",
-                            children=[html.P('Ingrese la fecha que desea revisar'),
+                            children = [html.P('Ingrese la fecha que desea revisar'),
                                 dcc.DatePickerRange(
                                     id="date-picker",
                                     min_date_allowed=df['fecha'].min(),
