@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Oct 10 00:01:56 2020
+
+@author: juanp
+"""
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -12,18 +19,55 @@ from datetime import datetime as dt
 
 
 app = dash.Dash(
-    __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
+    __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True
 )
-app.title = 'My app'
+app.title = 'Favicon'
 server = app.server
 
+
+APP_PATH = str(pathlib.Path(__file__).parent.resolve())
+df = pd.read_csv(os.path.join(APP_PATH, os.path.join("rutas_ejemplo", "ejemplo_info.csv")))
+df['fecha'] = pd.to_datetime(df['fecha'],format = '%Y-%m-%d')
+df['fecha'] = df['fecha'].dt.strftime('%Y-%m-%d')
+Rutas = df['ruta'].astype('category').cat.categories.tolist() 
+
+
+colores = [ "#548B54",
+            "#32CD32",
+            "#228B22",
+            "#00FF00",
+            "#00EE00",
+            "#00CD00",
+            "#008B00",
+            "#008000",
+            "#006400",
+            "#308014",
+            "#7CFC00",
+            "#7FFF00",
+            "#76EE00",
+            "#66CD00",
+            "#458B00",
+            "#ADFF2F",
+            "#CAFF70",
+            "#BCEE68",
+            "#A2CD5A",
+            "#6E8B3D",
+            "#556B2F",
+            "#6B8E23",
+            "#C0FF3E",
+            "#B3EE3A"]
+
+
+hour_label ={}
+
+for label,value in zip(['0'+str(hour)+':00' for hour in range(10)]+[str(hour)+':00' for hour in range(10,24)],range(24)):
+    hour_label[value]=label
 
 
 
 # Plotly mapbox public token
 mapbox_access_token = "pk.eyJ1IjoiYW5kZ3VleiIsImEiOiJja2Z6ZnY2bmMwem9kMnVvN2t1ZXh4Y3NoIn0.drQC38MoDwPrQAh_qUrI3g"
 
-# Dictionary of important locations in New York
 list_of_locations = {
     "Madison Square Garden": {"lat": 40.7505, "lon": -73.9934},
     "Yankee Stadium": {"lat": 40.8296, "lon": -73.9262},
@@ -36,116 +80,70 @@ list_of_locations = {
     "United Nations HQ": {"lat": 40.7489, "lon": -73.9680},
 }
 
-# Initialize data frame
-df1 = pd.read_csv(
-    "https://raw.githubusercontent.com/plotly/datasets/master/uber-rides-data1.csv",
-    dtype=object,
-)
-df2 = pd.read_csv(
-    "https://raw.githubusercontent.com/plotly/datasets/master/uber-rides-data2.csv",
-    dtype=object,
-)
-df3 = pd.read_csv(
-    "https://raw.githubusercontent.com/plotly/datasets/master/uber-rides-data3.csv",
-    dtype=object,
-)
-df = pd.concat([df1, df2, df3], axis=0)
-df["Date/Time"] = pd.to_datetime(df["Date/Time"], format="%Y-%m-%d %H:%M")
-df.index = df["Date/Time"]
-df.drop("Date/Time", 1, inplace=True)
-totalList = []
-for month in df.groupby(df.index.month):
-    dailyList = []
-    for day in month[1].groupby(month[1].index.day):
-        dailyList.append(day[1])
-    totalList.append(dailyList)
-totalList = np.array(totalList)
-
-
-
-# Gets the amount of days in the specified month
-# Index represents month (0 is April, 1 is May, ... etc.)
-daysInMonth = [30, 31, 30, 31, 31, 30]
-
-# Get index for the specified month in the dataframe
-monthIndex = pd.Index(["Apr", "May", "June", "July", "Aug", "Sept"])
-
-# Get the amount of rides per hour based on the time selected
-# This also higlights the color of the histogram bars based on
-# if the hours are selected
-def get_selection(month, day, selection):
-    xVal = []
-    yVal = []
-    xSelected = []
-    colorVal = [
-        "#F4EC15",
-        "#DAF017",
-        "#BBEC19",
-        "#9DE81B",
-        "#80E41D",
-        "#66E01F",
-        "#4CDC20",
-        "#34D822",
-        "#24D249",
-        "#25D042",
-        "#26CC58",
-        "#28C86D",
-        "#29C481",
-        "#2AC093",
-        "#2BBCA4",
-        "#2BB5B8",
-        "#2C99B4",
-        "#2D7EB0",
-        "#2D65AC",
-        "#2E4EA4",
-        "#2E38A4",
-        "#3B2FA0",
-        "#4E2F9C",
-        "#603099",
-    ]
-
-    # Put selected times into a list of numbers xSelected
-    xSelected.extend([int(x) for x in selection])
-
-    for i in range(24):
-        # If bar is selected then color it white
-        if i in xSelected and len(xSelected) < 24:
-            colorVal[i] = "#FFFFFF"
-        xVal.append(i)
-        # Get the number of rides at a particular time
-        yVal.append(len(totalList[month][day][totalList[month][day].index.hour == i]))
-    return [np.array(xVal), np.array(yVal), np.array(colorVal)]
-
 
 def build_banner():
-    """This function create the header/banner in the top of the app"""
+    
     return html.Div(
-        id="banner",
-        className="banner",
-        children=[
+        id = 'banner',
+        className = 'banner',
+        children = [
             html.Div(
-                id="banner-text",
-                children=[
-                    html.H5("Carga de pasajeros Dashboard"),
-                    html.H6("Área metropolitana del Valle de Aburrá"),
-                ],
-            ),
+                id = 'Banner - Text',
+                children =[
+                    html.H2("Carga de Pasajeros"),
+                    html.H6("Área metropolitana del Valle de Aburrá")
+                    ]
+                ),
             html.Div(
-                id="banner-logo",
-                children=[
+                id = 'banner-logo',
+                children = [
                     html.Button(
-                        id="learn-more-button", children="LEARN MORE", n_clicks=0
+                        id = 'Description-button',
+                        children = 'Información',
+                        n_clicks = 0
+                        ),
+                    html.A([
+                        html.Img(
+                            id = 'Logo',
+                            src = 'https://sim.metropol.gov.co/welcome.png'
+                            )
+                        ], href = 'https://www.metropol.gov.co/'                        
+                        )
+                    ]
+                )
+            ]
+        )
+
+def build_tabs():
+    return html.Div(
+        id="tabs",
+        className="tabs",
+        children=[
+            dcc.Tabs(
+                id="app-tabs",
+                value="tab1",
+                className="custom-tabs",
+                children=[
+                    dcc.Tab(
+                        id="Specs-tab",
+                        label="Descripción",
+                        value="tab1",
+                        className="custom-tab",
+                        selected_className="custom-tab--selected",
                     ),
-                    html.Img(id="logo", src='https://sim.metropol.gov.co/welcome.png'),
+                    dcc.Tab(
+                        id="Control-chart-tab",
+                        label="Predicción",
+                        value="tab2",
+                        className="custom-tab",
+                        selected_className="custom-tab--selected",
+                    ),
                 ],
-            ),
+            )
         ],
     )
 
-
 def generate_modal():
-    """This function create the pop-up window that is display when
-    learn more button is clicked"""
     return html.Div(
         id="markdown",
         className="modal",
@@ -191,77 +189,28 @@ def generate_modal():
         ),
     )
 
+def add_loads(df):
 
-def build_tabs():
-    return html.Div(
-        id="tabs",
-        className="tabs",
-        children=[
-            dcc.Tabs(
-                id="app-tabs",
-                value="tab2",
-                className="custom-tabs",
-                children=[
-                    dcc.Tab(
-                        id="Specs-tab",
-                        label="Análisis historico",
-                        value="tab1",
-                        className="custom-tab",
-                        selected_className="custom-tab--selected",
-                    ),
-                    dcc.Tab(
-                        id="Control-chart-tab",
-                        label="Análisis predictivo",
-                        value="tab2",
-                        className="custom-tab",
-                        selected_className="custom-tab--selected",
-                    ),
-                ],
-            )
-        ],
-    )
+    data = df.groupby(by=['latitud', 'longitud']).sum()
+    latitud, longitud = zip(*data.index.values)
+    data['latitud'] = latitud
+    data['longitud'] = longitud
+    return data
 
 
-def build_dropdown(placeholder, idName, optionsList):
-    return (
-                html.Div(
-                    className="row",
-                    children=[
-                        html.Div(
-                            className="div-for-dropdown",
-                            children=[
-                                # Dropdown for locations on map
-                                dcc.Dropdown(
-                                    id=idName,
-                                    options=[
-                                        {"label": i, "value": i}
-                                        for i in optionsList
-                                    ],
-                                    placeholder=placeholder,
-                                )
-                            ],
-                        ),
-                        ],
-                    )
-                )
+@app.callback(
+    Output("markdown", "style"),
+    [Input("Description-button", "n_clicks"), Input("markdown_close", "n_clicks")],
+)
+def update_click_output(button_click, close_click):
+    ctx = dash.callback_context
 
+    if ctx.triggered:
+        prop_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        if prop_id == "Description-button":
+            return {"display": "block"}
 
-def build_date_picker(idName):
-    return(
-            html.Div(
-                className="div-for-dropdown",
-                children=[
-                    dcc.DatePickerSingle(
-                        id=idName,
-                        min_date_allowed=dt(2014, 4, 1),
-                        max_date_allowed=dt(2014, 9, 30),
-                        initial_visible_month=dt(2014, 4, 1),
-                        date=dt(2014, 4, 1).date(),
-                        display_format="MMMM D, YYYY",
-                    )
-                ],
-            )
-    )
+    return {"display": "none"}
 
 
 def build_tab_1():
@@ -273,33 +222,71 @@ def build_tab_1():
                 html.Div(
                     className="four columns div-user-controls",
                     children=[
-                        build_date_picker("date-picker"),
-                        build_date_picker("date-picker"),
+                        html.Button('Reset', id='reset-val', n_clicks=0),
+                        #html.Div(dcc.Checklist(
+                        #        id="all-data-picker",
+                        #        options=[
+                        #            {'label': 'Use all the data', 'value': 'all'}
+                        #        ],
+                        #        value=['all']
+                        #    )),
+                        html.Div(
+                            className="div-for-dropdown",
+                            children=[html.P('Ingrese la fecha que desea revisar'),
+                                dcc.DatePickerRange(
+                                    id="date-picker",
+                                    min_date_allowed=df['fecha'].min(),
+                                    max_date_allowed=df['fecha'].max(),
+                                    initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
+                                    end_date=dt(dt.now().year, dt.now().month, dt.now().day).date(),
+                                    display_format="MMMM D, YYYY",
+                                    style={'backgroud': 'blue'},
+                                )
+                            ],
+                        ),
                         # Change to side-by-side for mobile layout
                         html.Div(
                             className="row",
                             children=[
-                                build_dropdown("Periodo de agrupacion",
-                                                "location-dropdown",
-                                                ['Hora','Día','Mes']),
                                 html.Div(
                                     className="div-for-dropdown",
-                                    children=[
+                                    children=[html.P('Ingrese la Ruta que desea revisar'),
+                                        # Dropdown for locations on map
+                                        dcc.Dropdown(
+                                            id="location-dropdown",
+                                            options=[
+                                                {"label": ruta, "value": ruta}
+                                                for ruta in Rutas
+                                            ],
+                                            multi=True,
+                                            placeholder="Ruta",
+                                            searchable=True
+                                        )
+                                    ],
+                                ),
+                                html.Div(
+                                    className="div-for-dropdown",
+                                    children=[html.P('Ingrese la hora que desea revisar'),
                                         # Dropdown to select times
                                         dcc.Dropdown(
                                             id="bar-selector",
                                             options=[
                                                 {
-                                                    "label": str(n) + ":00",
-                                                    "value": str(n),
+                                                    "label": hour_label[value],
+                                                    "value": value,
                                                 }
-                                                for n in range(24)
+                                                for value in hour_label.keys()
                                             ],
                                             multi=True,
-                                            placeholder="Select certain hours",
+                                            placeholder="Hora del dia",
                                         )
                                     ],
                                 ),
+                                html.Img(
+                                    id='team-logo',
+                                    src='assets/team_img.jpeg',
+                                    style={'width': '100%'}
+                                    )
                             ],
                         ),
                     ],
@@ -312,7 +299,7 @@ def build_tab_1():
                         html.Div(
                             className="text-padding",
                             children=[
-                                "Select any of the bars on the histogram to section data by time."
+                                html.P("Select any of the bars on the histogram to section data by time.")
                             ],
                         ),
                         dcc.Graph(id="histogram"),
@@ -324,30 +311,12 @@ def build_tab_1():
 
 
 def build_tab_2():
-    return(
-            html.Div(
-                    id="banner-text",
-                    children=[
-                        html.H6("LOADING..."),
-                    ],
-                ),
+    return (
+        html.Div(
+                id = 'tab2-content',
+                children = [html.H2('En Desarrollo...')]
+            ),
         )
-
-
-# ======= Callbacks for modal popup =======
-@app.callback(
-    Output("markdown", "style"),
-    [Input("learn-more-button", "n_clicks"), Input("markdown_close", "n_clicks")],
-)
-def update_click_output(button_click, close_click):
-    ctx = dash.callback_context
-
-    if ctx.triggered:
-        prop_id = ctx.triggered[0]["prop_id"].split(".")[0]
-        if prop_id == "learn-more-button":
-            return {"display": "block"}
-
-    return {"display": "none"}
 
 
 @app.callback(
@@ -357,58 +326,41 @@ def update_click_output(button_click, close_click):
 def render_tab_content(tab_switch):
     if tab_switch == "tab1":
         return build_tab_1()
-    return build_tab_2()
-
-
-"""Layout of Dash App"""
-app.layout = html.Div(
-    children=[
-        build_banner(),
-        html.Div(
-            id="app-container",
-            children=[
-                build_tabs(),
-                # Main app
-                html.Div(id="app-content"),
-            ],
-        ),
-        generate_modal(),
-    ]
-)
-
-# Selected Data in the Histogram updates the Values in the DatePicker
-@app.callback(
-    Output("bar-selector", "value"),
-    [Input("histogram", "selectedData"), Input("histogram", "clickData")],
-)
-def update_bar_selector(value, clickData):
-    holder = []
-    if clickData:
-        holder.append(str(int(clickData["points"][0]["x"])))
-    if value:
-        for x in value["points"]:
-            holder.append(str(int(x["x"])))
-    return list(set(holder))
-
-
-# Clear Selected Data if Click Data is used
-@app.callback(Output("histogram", "selectedData"), [Input("histogram", "clickData")])
-def update_selected_data(clickData):
-    if clickData:
-        return {"points": []}
+    else:
+        return build_tab_2()
 
 
 # Update Histogram Figure based on Month, Day and Times Chosen
 @app.callback(
     Output("histogram", "figure"),
-    [Input("date-picker", "date"), Input("bar-selector", "value")],
-)
-def update_histogram(datePicked, selection):
-    date_picked = dt.strptime(datePicked, "%Y-%m-%d")
-    monthPicked = date_picked.month - 4
-    dayPicked = date_picked.day - 1
+    [
+        Input("date-picker", "start_date"),
+        Input("date-picker", "end_date"),
+        Input("location-dropdown", "value")
+    ],
+    )
+def update_histogram(start_date, end_date, route_selected):
 
-    [xVal, yVal, colorVal] = get_selection(monthPicked, dayPicked, selection)
+    data = df.copy()
+
+    if start_date and end_date:
+        data = df[(df['fecha'] >= start_date) & (df['fecha'] <= end_date)]
+
+    if route_selected:
+        data = data[df['ruta'].apply(lambda x: x in route_selected)]
+
+    xVal = []
+    yVal = []
+
+    for hour in hour_label:
+        if hour in data['hora']:
+            xVal.append(hour)
+            yVal.append(int(data['carga'][data['hora'] == hour].sum()))
+
+    xVal = pd.Series(xVal)
+    yVal = pd.Series(yVal)
+
+    colorVal = colores[:int(len(xVal))]
 
     layout = go.Layout(
         bargap=0.01,
@@ -418,7 +370,7 @@ def update_histogram(datePicked, selection):
         showlegend=False,
         plot_bgcolor="white",
         paper_bgcolor="white",
-        dragmode="select",
+        #dragmode="select",
         font=dict(color="black"),
         xaxis=dict(
             range=[-0.5, 23.5],
@@ -428,7 +380,7 @@ def update_histogram(datePicked, selection):
             ticksuffix=":00",
         ),
         yaxis=dict(
-            range=[0, max(yVal) + max(yVal) / 4],
+        #   range=[0, max(yVal) + max(yVal) / 4],
             showticklabels=False,
             showgrid=False,
             fixedrange=True,
@@ -465,60 +417,68 @@ def update_histogram(datePicked, selection):
         layout=layout,
     )
 
+@app.callback(
+        Output("date-picker", "start_date"),
+        Output("date-picker", "end_date"),
+        Output("location-dropdown", "value"),
+        Output("bar-selector", "value"),
+    [
+        Input("reset-val", "n_clicks"),
+    ],
+    )
+def use_all_data(n_clicks):
 
-# Get the Coordinates of the chosen months, dates and times
-def getLatLonColor(selectedData, month, day):
-    listCoords = totalList[month][day]
-
-    # No times selected, output all times for chosen month and date
-    if selectedData is None or len(selectedData) is 0:
-        return listCoords
-    listStr = "listCoords["
-    for time in selectedData:
-        if selectedData.index(time) is not len(selectedData) - 1:
-            listStr += "(totalList[month][day].index.hour==" + str(int(time)) + ") | "
-        else:
-            listStr += "(totalList[month][day].index.hour==" + str(int(time)) + ")]"
-    return eval(listStr)
+    value = []
+    start_date = df['fecha'].min()
+    end_date = df['fecha'].max()
+    return start_date, end_date, value, value
 
 
-# Update Map Graph based on date-picker, selected data on histogram and location dropdown
+
 @app.callback(
     Output("map-graph", "figure"),
     [
-        Input("date-picker", "date"),
-        Input("bar-selector", "value"),
+        Input("date-picker", "start_date"),
+        Input("date-picker", "end_date"),
         Input("location-dropdown", "value"),
+        Input("bar-selector", "value")
     ],
 )
-def update_graph(datePicked, selectedData, selectedLocation):
-    zoom = 12.0
+def update_graph(start_date, end_date, route_selected, hour_picked):
+    zoom = 10.0
     latInitial = 6.2259489
     lonInitial = -75.6119972
     bearing = 0
 
-    if selectedLocation:
-        zoom = 15.0
-        latInitial = list_of_locations[selectedLocation]["lat"]
-        lonInitial = list_of_locations[selectedLocation]["lon"]
+    data = df.copy()
 
-    date_picked = dt.strptime(datePicked, "%Y-%m-%d")
-    monthPicked = date_picked.month - 4
-    dayPicked = date_picked.day - 1
-    listCoords = getLatLonColor(selectedData, monthPicked, dayPicked)
+    if start_date and end_date:
+        try:
+            data = data[(data['fecha'] >= start_date) & (data['fecha'] <= end_date)]
+        except:
+            pass
+        print(start_date)
+
+    if route_selected:
+        data = data[data['ruta'].apply(lambda x: x in route_selected)]
+
+    if hour_picked:
+        data = data[data['hora'].apply(lambda x: float(x) in hour_picked)]
+
+    data = add_loads(data)
 
     return go.Figure(
         data=[
             # Data for all rides based on date and time
             Scattermapbox(
-                lat=listCoords["Lat"],
-                lon=listCoords["Lon"],
+                lat=data['latitud'],
+                lon=data['longitud'],
                 mode="markers",
                 hoverinfo="lat+lon+text",
-                text=listCoords.index.hour,
+                text=data['hora'],
                 marker=dict(
                     showscale=True,
-                    color=np.append(np.insert(listCoords.index.hour, 0, 0), 23),
+                    color=np.append(np.insert(data['hora'].value_counts().index, 0, 0), 23),
                     opacity=0.5,
                     size=5,
                     colorscale=[
@@ -552,11 +512,11 @@ def update_graph(datePicked, selectedData, selectedLocation):
             ),
             # Plot of important locations on the map
             Scattermapbox(
-                lat=[list_of_locations[i]["lat"] for i in list_of_locations],
-                lon=[list_of_locations[i]["lon"] for i in list_of_locations],
+                lat=[i for i in data["latitud"]],
+                lon=[i for i in data["longitud"]],
                 mode="markers",
                 hoverinfo="text",
-                text=[i for i in list_of_locations],
+                text=[i for i in data['carga']],
                 marker=dict(size=8, color="#ffa0a0"),
             ),
         ],
@@ -607,59 +567,34 @@ def update_graph(datePicked, selectedData, selectedLocation):
         ),
     )
 
-# Update the total number of rides Tag
-@app.callback(Output("total-rides", "children"), [Input("date-picker", "date")])
-def update_total_rides(datePicked):
-    date_picked = dt.strptime(datePicked, "%Y-%m-%d")
-    return "Total Number of rides: {:,d}".format(
-        len(totalList[date_picked.month - 4][date_picked.day - 1])
-    )
 
-
-# Update the total number of rides in selected times
-@app.callback(
-    [Output("total-rides-selection", "children"), Output("date-value", "children")],
-    [Input("date-picker", "date"), Input("bar-selector", "value")],
-)
-def update_total_rides_selection(datePicked, selection):
-    firstOutput = ""
-
-    if selection is not None or len(selection) is not 0:
-        date_picked = dt.strptime(datePicked, "%Y-%m-%d")
-        totalInSelection = 0
-        for x in selection:
-            totalInSelection += len(
-                totalList[date_picked.month - 4][date_picked.day - 1][
-                    totalList[date_picked.month - 4][date_picked.day - 1].index.hour
-                    == int(x)
-                ]
-            )
-        firstOutput = "Total rides in selection: {:,d}".format(totalInSelection)
-
-    if (
-        datePicked is None
-        or selection is None
-        or len(selection) is 24
-        or len(selection) is 0
-    ):
-        return firstOutput, (datePicked, " - showing hour(s): All")
-
-    holder = sorted([int(x) for x in selection])
-
-    if holder == list(range(min(holder), max(holder) + 1)):
-        return (
-            firstOutput,
-            (
-                datePicked,
-                " - showing hour(s): ",
-                holder[0],
-                "-",
-                holder[len(holder) - 1],
-            ),
+# Layout of Dash App
+app.layout = html.Div(
+    children=[build_banner(),
+              html.Div(
+                  id = 'app-container',
+                  children = [
+                      build_tabs(),
+                      html.Div(
+                          id = 'app-content'
+                          )
+                      ]
+                  ),
+              generate_modal()
+            ]
         )
 
-    holder_to_string = ", ".join(str(x) for x in holder)
-    return firstOutput, (datePicked, " - showing hour(s): ", holder_to_string)
+
+# Selected Data in the Histogram updates the Values in the DatePicker
+#@app.callback(
+#    Output("bar-selector", "value"),
+#    [Input("histogram", "selectedData"), Input("histogram", "clickData")],
+#)
+#def update_bar_selector(value, clickData):
+#    holder = []
+#    if clickData:
+#        holder = [str(int(clickData["points"][0]["x"]))]
+#    return holder
 
 
 if __name__ == "__main__":
