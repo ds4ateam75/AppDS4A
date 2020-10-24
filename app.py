@@ -82,7 +82,7 @@ list_of_locations = {
 
 
 def build_banner():
-    
+
     return html.Div(
         id = 'banner',
         className = 'banner',
@@ -417,7 +417,7 @@ def update_histogram(start_date, end_date, route_selected):
         layout=layout,
     )
 
-
+"""
 @app.callback(
         Output("date-picker", "start_date"),
         Output("date-picker", "end_date"),
@@ -433,7 +433,7 @@ def use_all_data(n_clicks):
     start_date = df['fecha'].min()
     end_date = df['fecha'].max()
 
-    return start_date, end_date, value, value
+    return start_date, end_date, value, value"""
 
 
 @app.callback(
