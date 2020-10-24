@@ -417,22 +417,23 @@ def update_histogram(start_date, end_date, route_selected):
         layout=layout,
     )
 
+
 @app.callback(
         Output("date-picker", "start_date"),
         Output("date-picker", "end_date"),
         Output("location-dropdown", "value"),
         Output("bar-selector", "value"),
-    [
-        Input("reset-val", "n_clicks"),
-    ],
+        [
+            Input("reset-val", "n_clicks"),
+        ],
     )
 def use_all_data(n_clicks):
 
     value = []
     start_date = df['fecha'].min()
     end_date = df['fecha'].max()
-    return start_date, end_date, value, value
 
+    return start_date, end_date, value, value
 
 
 @app.callback(
