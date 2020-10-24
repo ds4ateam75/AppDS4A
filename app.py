@@ -599,4 +599,4 @@ app.layout = html.Div(
 
 
 if __name__ == "__main__":
-    app.run_server(host='0.0.0.0')
+    app.run_server(host='18.218.13.163')
