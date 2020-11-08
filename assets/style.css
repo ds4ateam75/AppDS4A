@@ -45,8 +45,11 @@ a {
 }
 /* Graph Control Objects ––––––––––––––––––––––––––––––––––––––––––––––––––*/
 .div-user-controls {
-  padding-left: 55px;
-  padding-top: 64px;
+  padding: 10px;
+  width: 100%;
+  -webkit-box-shadow: 18px 23px 68px -21px rgba(0,0,0,0.75);
+  -moz-box-shadow: 18px 23px 68px -21px rgba(0,0,0,0.75);
+  box-shadow: 18px 23px 68px -21px rgba(0,0,0,0.75);
 }
 .div-for-dropdown {
   padding-top: 12px;
@@ -156,6 +159,7 @@ a {
       display: block;
       margin: 0px;
       overflow-y: scroll;
+      background-image: url("paper.gif");
   }
   .div-for-charts {
       padding: 0px;

@@ -9,14 +9,13 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
-import numpy as np
 import os
 import pathlib
 from dash.dependencies import Input, Output
 from plotly import graph_objs as go
 from plotly.graph_objs import *
 from datetime import datetime as dt
-
+import numpy as np
 
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True
@@ -68,17 +67,127 @@ for label,value in zip(['0'+str(hour)+':00' for hour in range(10)]+[str(hour)+':
 # Plotly mapbox public token
 mapbox_access_token = "pk.eyJ1IjoiYW5kZ3VleiIsImEiOiJja2Z6ZnY2bmMwem9kMnVvN2t1ZXh4Y3NoIn0.drQC38MoDwPrQAh_qUrI3g"
 
-list_of_locations = {
-    "Madison Square Garden": {"lat": 40.7505, "lon": -73.9934},
-    "Yankee Stadium": {"lat": 40.8296, "lon": -73.9262},
-    "Empire State Building": {"lat": 40.7484, "lon": -73.9857},
-    "New York Stock Exchange": {"lat": 40.7069, "lon": -74.0113},
-    "JFK Airport": {"lat": 40.644987, "lon": -73.785607},
-    "Grand Central Station": {"lat": 40.7527, "lon": -73.9772},
-    "Times Square": {"lat": 40.7589, "lon": -73.9851},
-    "Columbia University": {"lat": 40.8075, "lon": -73.9626},
-    "United Nations HQ": {"lat": 40.7489, "lon": -73.9680},
-}
+
+#
+# # Functions
+#
+
+
+def generate_modal():
+    """
+    LinuxThingy version 1.6.5
+
+    Parameters:
+
+    -t (--text): show the text interface
+    -h (--help): display this help
+    """
+    return html.Div(
+        id="markdown",
+        className="modal",
+        children=(
+            html.Div(
+                id="markdown-container",
+                className="markdown-container",
+                children=[
+                    html.Div(
+                        className="close-container",
+                        children=html.Button(
+                            "Close",
+                            id="markdown_close",
+                            n_clicks=0,
+                            className="closeButton",
+                        ),
+                    ),
+                    html.Div(
+                        className="markdown-text",
+                        children=dcc.Markdown(
+                            children=(
+                                """
+                        ###### What is this mock app about?
+
+                        This is a dashboard for monitoring real-time process quality along manufacture production line.
+
+                        ###### What does this app shows
+
+                        Click on buttons in `Parameter` column to visualize details of measurement trendlines on the bottom panel.
+
+                        The sparkline on top panel and control chart on bottom panel show Shewhart process monitor using mock data.
+                        The trend is updated every other second to simulate real-time measurements. Data falling outside of six-sigma control limit are signals indicating 'Out of Control(OOC)', and will
+                        trigger alerts instantly for a detailed checkup.
+                        Operators may stop measurement by clicking on `Stop` button, and edit specification parameters by clicking specification tab."""
+                            )
+                        ),
+                    ),
+                ],
+            )
+        ),
+    )
+
+
+## Coulb be deleted
+def add_loads(df):
+
+    data = df.groupby(by=['latitud', 'longitud']).sum()
+    latitud, longitud = zip(*data.index.values)
+    data['latitud'] = latitud
+    data['longitud'] = longitud
+    return data
+
+
+def map_links(df):
+
+    """
+    This function return a plot of the map
+    """
+
+    streetsPLot = Scattermapbox(
+                text=df['Carga'],
+                hoverinfo="text",
+                lat=tuple(list(df['Latitud'])),
+                lon=tuple(list(df['Longitud'])),
+                mode="markers", #"lines+markers",
+                #line=dict(width=5, color="#000000"),
+                marker=dict(
+                    allowoverlap=True,
+                    showscale=True,
+                    color=df['Carga'],
+                    opacity=1,
+                    size=5,
+                    colorscale=[
+                        [0, "#000000"],
+                        [0.04167, "#000000"],
+                        [0.0833, "#262b0c"],
+                        [0.125, "#BBEC19"],
+                        [0.1667, "#80E41D"],
+                        [0.2083, "#66E01F"],
+                        [0.25, "#4CDC20"],
+                        [0.292, "#34D822"],
+                        [0.333, "#24D249"],
+                        [0.375, "#25D042"],
+                        [0.4167, "#26CC58"],
+                        [0.4583, "#28C86D"],
+                        [0.50, "#29C481"],
+                        [0.54167, "#2AC093"],
+                        [0.5833, "#2BBCA4"],
+                        [1.0, "#613099"],
+                    ],
+                    colorbar=dict(
+                        title="Time of<br>Day",
+                        x=0.93,
+                        xpad=0,
+                        nticks=24,
+                        tickfont=dict(color="#000000"),
+                        titlefont=dict(color="#000000"),
+                        thicknessmode="pixels",
+                    ),
+                )
+            )
+    return streetsPLot
+
+#
+# # GUI
+#
 
 
 def build_banner():
@@ -114,6 +223,7 @@ def build_banner():
             ]
         )
 
+
 def build_tabs():
     return html.Div(
         id="tabs",
@@ -143,75 +253,6 @@ def build_tabs():
         ],
     )
 
-def generate_modal():
-    return html.Div(
-        id="markdown",
-        className="modal",
-        children=(
-            html.Div(
-                id="markdown-container",
-                className="markdown-container",
-                children=[
-                    html.Div(
-                        className="close-container",
-                        children=html.Button(
-                            "Close",
-                            id="markdown_close",
-                            n_clicks=0,
-                            className="closeButton",
-                        ),
-                    ),
-                    html.Div(
-                        className="markdown-text",
-                        children=dcc.Markdown(
-                            children=(
-                                """
-                        ###### What is this mock app about?
-
-                        This is a dashboard for monitoring real-time process quality along manufacture production line.
-
-                        ###### What does this app shows
-
-                        Click on buttons in `Parameter` column to visualize details of measurement trendlines on the bottom panel.
-
-                        The sparkline on top panel and control chart on bottom panel show Shewhart process monitor using mock data.
-                        The trend is updated every other second to simulate real-time measurements. Data falling outside of six-sigma control limit are signals indicating 'Out of Control(OOC)', and will
-                        trigger alerts instantly for a detailed checkup.
-                        
-                        Operators may stop measurement by clicking on `Stop` button, and edit specification parameters by clicking specification tab.
-
-                    """
-                            )
-                        ),
-                    ),
-                ],
-            )
-        ),
-    )
-
-def add_loads(df):
-
-    data = df.groupby(by=['latitud', 'longitud']).sum()
-    latitud, longitud = zip(*data.index.values)
-    data['latitud'] = latitud
-    data['longitud'] = longitud
-    return data
-
-
-@app.callback(
-    Output("markdown", "style"),
-    [Input("Description-button", "n_clicks"), Input("markdown_close", "n_clicks")],
-)
-def update_click_output(button_click, close_click):
-    ctx = dash.callback_context
-
-    if ctx.triggered:
-        prop_id = ctx.triggered[0]["prop_id"].split(".")[0]
-        if prop_id == "Description-button":
-            return {"display": "block"}
-
-    return {"display": "none"}
-
 
 def build_tab_1():
     return(
@@ -222,12 +263,104 @@ def build_tab_1():
                 html.Div(
                     className="four columns div-user-controls",
                     children=[
-                        html.Button('Reset', id='reset-val', n_clicks=0),
+                            html.Div(
+                                children=[
+                                    dcc.Graph(id="histogram")
+                                ],
+                            ),
+                        #    html.Img(
+                        #        id='team-logo',
+                        #        src='assets/team_img.jpeg',
+                        #        style={'width': '100%'}
+                        #),
+                        # Change to side-by-side for mobile layout
+                        html.Div(
+                            className="row",
+                            children=[
+                                html.Div(
+                                        className="div-for-dropdown",
+                                        children = [html.P('Ingrese la fecha que desea revisar'),
+                                            dcc.DatePickerRange(
+                                                id="date-picker",
+                                                min_date_allowed=df['fecha'].min(),
+                                                max_date_allowed=df['fecha'].max(),
+                                                initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
+                                                end_date=dt(dt.now().year, dt.now().month, dt.now().day).date(),
+                                                display_format="MMMM D, YYYY",
+                                                #style={'backgroud': 'blue'},
+                                            )
+                                        ],
+                                    ),
+                                html.Div(
+                                    className="div-for-dropdown",
+                                    children=[html.P('Seleccione un dia de la semana'),
+                                        # Dropdown for locations on map
+                                        dcc.Dropdown(
+                                            id="ruta-dropdown",
+                                            options=[
+                                                {"label": dia, "value": idx}
+                                                for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
+                                            ],
+                                            multi=True,
+                                            placeholder="Dia",
+                                            searchable=True
+                                        )
+                                    ],
+                                ),
+                                html.Div(
+                                    className="div-for-dropdown",
+                                    children=[html.P('Ingrese la hora que desea revisar'),
+                                        # Dropdown to select times
+                                        dcc.Dropdown(
+                                            id="hour-selector",
+                                            options=[
+                                                {
+                                                    "label": hour_label[value],
+                                                    "value": value,
+                                                }
+                                                for value in hour_label.keys()
+                                            ],
+                                            multi=True,
+                                            placeholder="Hora del dia",
+                                        )
+                                    ],
+                                ),
+                                html.Button('Limpiar', id='limpiar-descripcion', n_clicks=0),
+                            ],
+                        ),
+                    ],
+                ),
+                # Column for app graphs and plots
+                html.Div(
+                    className="eight columns div-for-charts bg-grey",
+                    children=[
+                        dcc.Graph(id="map-graph",animate=True),
+                        #dcc.Graph(id="histogram"),
+                    ],
+                ),
+            ],
+        ),
+    )
+
+
+def build_tab_2():
+    return(html.Div(
+            className="row",
+            children=[
+                # Column for user controls
+                html.Div(
+                    className="four columns div-user-controls",
+                    children=[
+                            html.Div(
+                            children=[
+                                dcc.Graph(id="histogram-prediccion"),
+                            ],
+                        ),
                         html.Div(
                             className="div-for-dropdown",
                             children = [html.P('Ingrese la fecha que desea revisar'),
                                 dcc.DatePickerRange(
-                                    id="date-picker",
+                                    id="date-picker-prediccion",
                                     min_date_allowed=df['fecha'].min(),
                                     max_date_allowed=df['fecha'].max(),
                                     initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
@@ -243,16 +376,16 @@ def build_tab_1():
                             children=[
                                 html.Div(
                                     className="div-for-dropdown",
-                                    children=[html.P('Ingrese la Ruta que desea revisar'),
+                                    children=[html.P('Seleccione un dia de la semana'),
                                         # Dropdown for locations on map
                                         dcc.Dropdown(
-                                            id="location-dropdown",
+                                            id="ruta-dropdown-prediccion",
                                             options=[
-                                                {"label": ruta, "value": ruta}
-                                                for ruta in Rutas
+                                                {"label": dia, "value": idx}
+                                                for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
                                             ],
                                             multi=True,
-                                            placeholder="Ruta",
+                                            placeholder="Dia",
                                             searchable=True
                                         )
                                     ],
@@ -262,7 +395,7 @@ def build_tab_1():
                                     children=[html.P('Ingrese la hora que desea revisar'),
                                         # Dropdown to select times
                                         dcc.Dropdown(
-                                            id="bar-selector",
+                                            id="hour-selector-prediccion",
                                             options=[
                                                 {
                                                     "label": hour_label[value],
@@ -275,11 +408,7 @@ def build_tab_1():
                                         )
                                     ],
                                 ),
-                                html.Img(
-                                    id='team-logo',
-                                    src='assets/team_img.jpeg',
-                                    style={'width': '100%'}
-                                    )
+                                html.Button('Limpiar', id='limpiar-prediccion', n_clicks=0),
                             ],
                         ),
                     ],
@@ -288,14 +417,7 @@ def build_tab_1():
                 html.Div(
                     className="eight columns div-for-charts bg-grey",
                     children=[
-                        dcc.Graph(id="map-graph"),
-                        html.Div(
-                            className="text-padding",
-                            children=[
-                                html.P("Select any of the bars on the histogram to section data by time.")
-                            ],
-                        ),
-                        dcc.Graph(id="histogram"),
+                        dcc.Graph(id="map-graph",animate=True),
                     ],
                 ),
             ],
@@ -303,14 +425,11 @@ def build_tab_1():
     )
 
 
-def build_tab_2():
-    return (
-        html.Div(
-                id = 'tab2-content',
-                children = [html.H2('En Desarrollo...')]
-            ),
-        )
+#
+# # CALLBACKS
+#
 
+# # Descripcion
 
 @app.callback(
     [Output("app-content", "children")],
@@ -329,10 +448,11 @@ def render_tab_content(tab_switch):
     [
         Input("date-picker", "start_date"),
         Input("date-picker", "end_date"),
-        Input("location-dropdown", "value")
+        Input("ruta-dropdown", "value"),
+        Input("hour-selector", "value")
     ],
     )
-def update_histogram(start_date, end_date, route_selected):
+def update_histogram(start_date, end_date, route_selected, hour_picked):
 
     data = df.copy()
 
@@ -359,10 +479,11 @@ def update_histogram(start_date, end_date, route_selected):
         bargap=0.01,
         bargroupgap=0,
         barmode="group",
-        margin=go.layout.Margin(l=10, r=0, t=0, b=50),
+        margin=go.layout.Margin(l=10, r=0, t=50, b=50),
         showlegend=False,
-        plot_bgcolor="white",
         paper_bgcolor="white",
+        plot_bgcolor="white",
+        title="Carga total por hora",
         #dragmode="select",
         font=dict(color="black"),
         xaxis=dict(
@@ -380,53 +501,14 @@ def update_histogram(start_date, end_date, route_selected):
             rangemode="nonnegative",
             zeroline=False,
         ),
-        annotations=[
-            dict(
-                x=xi,
-                y=yi,
-                text=str(yi),
-                xanchor="center",
-                yanchor="bottom",
-                showarrow=False,
-                font=dict(color="black"),
-            )
-            for xi, yi in zip(xVal, yVal)
-        ],
     )
 
     return go.Figure(
         data=[
-            go.Bar(x=xVal, y=yVal, marker=dict(color=colorVal), hoverinfo="x"),
-            go.Scatter(
-                opacity=0,
-                x=xVal,
-                y=yVal / 2,
-                hoverinfo="none",
-                mode="markers",
-                marker=dict(color="rgb(66, 134, 244, 0)", symbol="square", size=40),
-                visible=True,
-            ),
+            go.Bar(x=xVal, y=yVal, marker=dict(color=colorVal), hoverinfo="y"),
         ],
         layout=layout,
     )
-
-"""
-@app.callback(
-        Output("date-picker", "start_date"),
-        Output("date-picker", "end_date"),
-        Output("location-dropdown", "value"),
-        Output("bar-selector", "value"),
-        [
-            Input("reset-val", "n_clicks"),
-        ],
-    )
-def use_all_data(n_clicks):
-
-    value = []
-    start_date = df['fecha'].min()
-    end_date = df['fecha'].max()
-
-    return start_date, end_date, value, value"""
 
 
 @app.callback(
@@ -434,24 +516,31 @@ def use_all_data(n_clicks):
     [
         Input("date-picker", "start_date"),
         Input("date-picker", "end_date"),
-        Input("location-dropdown", "value"),
-        Input("bar-selector", "value")
+        Input("ruta-dropdown", "value"),
+        Input("hour-selector", "value")
     ],
 )
-def update_graph(start_date, end_date, route_selected, hour_picked):
-    zoom = 10.0
+def update_map_descripcion(start_date, end_date, route_selected, hour_picked):
+    zoom = 13
     latInitial = 6.2259489
     lonInitial = -75.6119972
     bearing = 0
 
     data = df.copy()
 
+    """import data"""
+    df_arcos = pd.read_csv('Tablas/arcos.csv', index_col=0)
+    df_cargas = pd.read_csv('Tablas/tabla_consulta.csv', index_col=0)
+
+    """Assign loads to the streets"""
+    df_cargas.drop_duplicates(subset=['Arco'], inplace=True)
+    df_full = df_arcos.merge(df_cargas, how='left', on='Arco', validate="m:1")
+
     if start_date and end_date:
         try:
             data = data[(data['fecha'] >= start_date) & (data['fecha'] <= end_date)]
         except:
             pass
-        print(start_date)
 
     if route_selected:
         data = data[data['ruta'].apply(lambda x: x in route_selected)]
@@ -459,60 +548,10 @@ def update_graph(start_date, end_date, route_selected, hour_picked):
     if hour_picked:
         data = data[data['hora'].apply(lambda x: float(x) in hour_picked)]
 
-    data = add_loads(data)
-
+    #data = add_loads(data)
     return go.Figure(
         data=[
-            # Data for all rides based on date and time
-            Scattermapbox(
-                lat=data['latitud'],
-                lon=data['longitud'],
-                mode="markers",
-                hoverinfo="lat+lon+text",
-                text=data['hora'],
-                marker=dict(
-                    showscale=True,
-                    color=np.append(np.insert(data['hora'].value_counts().index, 0, 0), 23),
-                    opacity=0.5,
-                    size=5,
-                    colorscale=[
-                        [0, "#F4EC15"],
-                        [0.04167, "#DAF017"],
-                        [0.0833, "#BBEC19"],
-                        [0.125, "#9DE81B"],
-                        [0.1667, "#80E41D"],
-                        [0.2083, "#66E01F"],
-                        [0.25, "#4CDC20"],
-                        [0.292, "#34D822"],
-                        [0.333, "#24D249"],
-                        [0.375, "#25D042"],
-                        [0.4167, "#26CC58"],
-                        [0.4583, "#28C86D"],
-                        [0.50, "#29C481"],
-                        [0.54167, "#2AC093"],
-                        [0.5833, "#2BBCA4"],
-                        [1.0, "#613099"],
-                    ],
-                    colorbar=dict(
-                        title="Time of<br>Day",
-                        x=0.93,
-                        xpad=0,
-                        nticks=24,
-                        tickfont=dict(color="#d8d8d8"),
-                        titlefont=dict(color="#d8d8d8"),
-                        thicknessmode="pixels",
-                    ),
-                ),
-            ),
-            # Plot of important locations on the map
-            Scattermapbox(
-                lat=[i for i in data["latitud"]],
-                lon=[i for i in data["longitud"]],
-                mode="markers",
-                hoverinfo="text",
-                text=[i for i in data['carga']],
-                marker=dict(size=8, color="#ffa0a0"),
-            ),
+            map_links(df_full)  # Plot all streets
         ],
         layout=Layout(
             autosize=True,
@@ -520,7 +559,7 @@ def update_graph(start_date, end_date, route_selected, hour_picked):
             showlegend=False,
             mapbox=dict(
                 accesstoken=mapbox_access_token,
-                center=dict(lat=latInitial, lon=lonInitial),  # 40.7272  # -73.991251
+                center=dict(lat=latInitial, lon=lonInitial),
                 style="streets",
                 bearing=bearing,
                 zoom=zoom,
@@ -562,26 +601,176 @@ def update_graph(start_date, end_date, route_selected, hour_picked):
     )
 
 
-# Layout of Dash App
+@app.callback(
+    Output("markdown", "style"),
+    [Input("Description-button", "n_clicks"), Input("markdown_close", "n_clicks")],
+)
+def update_click_output(button_click, close_click):
+    ctx = dash.callback_context
+
+    if ctx.triggered:
+        prop_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        if prop_id == "Description-button":
+            return {"display": "block"}
+
+    return {"display": "none"}
+
+# # Prediccion
+
+@app.callback(
+    Output("map-graph-prediccion", "figure"),
+    [
+        Input("date-picker-prediccion", "start_date"),
+        Input("date-picker-prediccion", "end_date"),
+        Input("ruta-dropdown-prediccion", "value"),
+        Input("hour-selector-prediccion", "value")
+    ],
+)
+def update_map_prediccion(start_date, end_date, route_selected, hour_picked):
+    zoom = 10.0
+    latInitial = 6.2259489
+    lonInitial = -75.6119972
+    bearing = 0
+
+    data = df.copy()
+
+    """import data"""
+    df_arcos = pd.read_csv('Tablas/arcos.csv', index_col=0)
+    df_cargas = pd.read_csv('Tablas/tabla_consulta.csv', index_col=0)
+
+    """Assign loads to the streets"""
+    df_cargas.drop_duplicates(subset=['Arco'], inplace=True)
+    df_full = df_arcos.merge(df_cargas, how='left', on='Arco', validate="m:1")
+
+    if start_date and end_date:
+        try:
+            data = data[(data['fecha'] >= start_date) & (data['fecha'] <= end_date)]
+        except:
+            pass
+
+    if route_selected:
+        data = data[data['ruta'].apply(lambda x: x in route_selected)]
+
+    if hour_picked:
+        data = data[data['hora'].apply(lambda x: float(x) in hour_picked)]
+
+    #data = add_loads(data)
+    return go.Figure(
+        data=[
+            map_links(df_full)  # Plot all streets
+        ],
+        layout=Layout(
+            autosize=True,
+            margin=go.layout.Margin(l=0, r=35, t=0, b=0),
+            showlegend=False,
+            mapbox=dict(
+                accesstoken=mapbox_access_token,
+                center=dict(lat=latInitial, lon=lonInitial),
+                style="streets",
+                bearing=bearing,
+                zoom=zoom,
+            ),
+            updatemenus=[
+                dict(
+                    buttons=(
+                        [
+                            dict(
+                                args=[
+                                    {
+                                        "mapbox.zoom": 12,
+                                        "mapbox.center.lon": "-73.991251",
+                                        "mapbox.center.lat": "40.7272",
+                                        "mapbox.bearing": 0,
+                                        "mapbox.style": "streets",
+                                    }
+                                ],
+                                label="Reset Zoom",
+                                method="relayout",
+                            )
+                        ]
+                    ),
+                    direction="left",
+                    pad={"r": 0, "t": 0, "b": 0, "l": 0},
+                    showactive=False,
+                    type="buttons",
+                    x=0.45,
+                    y=0.02,
+                    xanchor="left",
+                    yanchor="bottom",
+                    bgcolor="#323130",
+                    borderwidth=3,
+                    bordercolor="#6d6d6d",
+                    font=dict(color="#FFFFFF"),
+                )
+            ],
+        ),
+    )
+
+
+@app.callback(
+    Output("histogram-prediccion", "figure"),
+    [Input("limpiar-prediccion", "n_clicks")],
+)
+def update_click_output(button_click):
+    x = np.random.randn(500)
+    return go.Figure(
+                    data=[
+                        go.Histogram(x=x)
+                        ],
+                    layout=go.Layout(
+                                paper_bgcolor="white",
+                                plot_bgcolor="white",
+                                title="TITULO_AQUI"
+                                )
+                    )
+
+
+#
+# # LAYOUT DASH APP
+#
+
+
 app.layout = html.Div(
     children=[build_banner(),
               html.Div(
-                  id = 'app-container',
-                  children = [
-                      build_tabs(),
-                      html.Div(
-                          id = 'app-content'
-                          )
-                      ]
-                  ),
-              generate_modal()
-            ]
+                  id='app-container',
+                  children=[build_tabs(), html.Div(id='app-content')]),
+              generate_modal()]
         )
 
+if __name__ == "__main__":
+    app.run_server(host='0.0.0.0')
+
+
+# -----------------------------------------------------------
+# demonstrates how to write ms excel files using python-openpyxl
+#
+# (C) 2015 Frank Hofmann, Berlin, Germany
+# Released under GNU Public License (GPL)
+# email frank.hofmann@efho.de
+# -----------------------------------------------------------
+
+"""
+@app.callback(
+        Output("date-picker", "start_date"),
+        Output("date-picker", "end_date"),
+        Output("ruta-dropdown", "value"),
+        Output("hour-selector", "value"),
+        [
+            Input("reset-val", "n_clicks"),
+        ],
+    )
+def use_all_data(n_clicks):
+
+    value = []
+    start_date = df['fecha'].min()
+    end_date = df['fecha'].max()
+
+    return start_date, end_date, value, value"""
 
 # Selected Data in the Histogram updates the Values in the DatePicker
 #@app.callback(
-#    Output("bar-selector", "value"),
+#    Output("hour-selector", "value"),
 #    [Input("histogram", "selectedData"), Input("histogram", "clickData")],
 #)
 #def update_bar_selector(value, clickData):
@@ -589,7 +778,3 @@ app.layout = html.Div(
 #    if clickData:
 #        holder = [str(int(clickData["points"][0]["x"]))]
 #    return holder
-
-
-if __name__ == "__main__":
-    app.run_server(host='0.0.0.0')
