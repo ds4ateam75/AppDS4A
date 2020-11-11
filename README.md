@@ -38,8 +38,8 @@ The project is created with:
 To run this app first clone repository and then open a terminal to the app folder.
 
 ```
-git clone https://github.com/plotly/dash-sample-apps.git
-cd dash-sample-apps/apps/dash-uber-rides-demo
+git clone https://github.com/ds4ateam75/AppDS4A.git
+cd AppDS4A
 ```
 
 Create and activate a new virtual environment (recommended) by running
