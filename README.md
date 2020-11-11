@@ -89,15 +89,12 @@ If you want to make a prediction of the load you have to go the prediction secti
 
 ![demo.png](demo.png)
 
-## Resources
-
-To learn more about Dash, please visit [documentation](https://plot.ly/dash).
 
 ## Credits
 
 This application was developed by DS4A Team 75:
 
-* Andrés Rodriguez. e-mail:
+* Andrés Rodriguez. e-mail: arrm.1996@gmail.com
 * Julián García. e-mail:
 * Ronald Morales. e-mail: 
 * Juan Chica. e-mail:
