@@ -4,7 +4,6 @@ Created on Sat Oct 10 00:01:56 2020
 
 @author: juanp
 """
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -16,6 +15,13 @@ from plotly import graph_objs as go
 from plotly.graph_objs import *
 from datetime import datetime as dt
 import numpy as np
+from utils.query_utils import Sql, Carga_query, Arco_query
+
+
+
+#
+# # OBJECTS INITIALIZATION
+#
 
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True
@@ -23,13 +29,25 @@ app = dash.Dash(
 app.title = 'AmvApp'
 server = app.server
 
+# Start query objects
+sql = Sql()
+cargaQuery = Carga_query()
+arcoQuery = Arco_query()
 
+# Could be deleted
 APP_PATH = str(pathlib.Path(__file__).parent.resolve())
 df = pd.read_csv(os.path.join(APP_PATH, os.path.join("rutas_ejemplo", "ejemplo_info.csv")))
 df['fecha'] = pd.to_datetime(df['fecha'],format = '%Y-%m-%d')
 df['fecha'] = df['fecha'].dt.strftime('%Y-%m-%d')
 Rutas = df['ruta'].astype('category').cat.categories.tolist() 
+hour_label ={}
 
+for label,value in zip(['0'+str(hour)+':00' for hour in range(10)]+[str(hour)+':00' for hour in range(10,24)],range(24)):
+    hour_label[value]=label
+
+#
+# # CONSTATNTS
+#
 
 colores = [ "#548B54",
             "#32CD32",
@@ -56,18 +74,11 @@ colores = [ "#548B54",
             "#C0FF3E",
             "#B3EE3A"]
 
-
-hour_label ={}
-
-for label,value in zip(['0'+str(hour)+':00' for hour in range(10)]+[str(hour)+':00' for hour in range(10,24)],range(24)):
-    hour_label[value]=label
-
-
-
-# Plotly mapbox public token
 mapbox_access_token = "pk.eyJ1IjoiYW5kZ3VleiIsImEiOiJja2Z6ZnY2bmMwem9kMnVvN2t1ZXh4Y3NoIn0.drQC38MoDwPrQAh_qUrI3g"
 
+df_arcos = sql.request(query=arcoQuery.get_arco_query())
 
+day = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 #
 # # Functions
 #
@@ -125,16 +136,6 @@ def generate_modal():
     )
 
 
-## Coulb be deleted
-def add_loads(df):
-
-    data = df.groupby(by=['latitud', 'longitud']).sum()
-    latitud, longitud = zip(*data.index.values)
-    data['latitud'] = latitud
-    data['longitud'] = longitud
-    return data
-
-
 def map_links(df):
 
     """
@@ -142,38 +143,25 @@ def map_links(df):
     """
 
     streetsPLot = Scattermapbox(
-                text=df['Carga'],
-                hoverinfo="text",
-                lat=tuple(list(df['Latitud'])),
-                lon=tuple(list(df['Longitud'])),
-                mode="markers", #"lines+markers",
+                text=df['text'],
+                lat=df['latitud'],
+                lon=df['longitud'],
+                hoverinfo='text',
+                mode="markers",
                 #line=dict(width=5, color="#000000"),
                 marker=dict(
                     allowoverlap=True,
                     showscale=True,
-                    color=df['Carga'],
+                    color=df['carga'],
                     opacity=1,
                     size=5,
                     colorscale=[
-                        [0, "#000000"],
-                        [0.04167, "#000000"],
-                        [0.0833, "#262b0c"],
-                        [0.125, "#BBEC19"],
-                        [0.1667, "#80E41D"],
-                        [0.2083, "#66E01F"],
-                        [0.25, "#4CDC20"],
-                        [0.292, "#34D822"],
-                        [0.333, "#24D249"],
-                        [0.375, "#25D042"],
-                        [0.4167, "#26CC58"],
-                        [0.4583, "#28C86D"],
-                        [0.50, "#29C481"],
-                        [0.54167, "#2AC093"],
-                        [0.5833, "#2BBCA4"],
-                        [1.0, "#613099"],
+                        [0, "#36FF00"],
+                        [0.25, "#FFF300"],
+                        [1.0, "#FF0000"],
                     ],
                     colorbar=dict(
-                        title="Time of<br>Day",
+                        title="Carga",
                         x=0.93,
                         xpad=0,
                         nticks=24,
@@ -216,7 +204,7 @@ def build_banner():
                             id = 'Logo',
                             src = 'https://sim.metropol.gov.co/welcome.png'
                             )
-                        ], href = 'https://www.metropol.gov.co/'                        
+                        ], href = 'https://www.metropol.gov.co/'
                         )
                     ]
                 )
@@ -282,10 +270,11 @@ def build_tab_1():
                                         children = [html.P('Ingrese la fecha que desea revisar'),
                                             dcc.DatePickerRange(
                                                 id="date-picker",
-                                                min_date_allowed=df['fecha'].min(),
-                                                max_date_allowed=df['fecha'].max(),
+                                                #min_date_allowed=df['fecha'].min(),
+                                                #max_date_allowed=df['fecha'].max(),
                                                 initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
-                                                end_date=dt(dt.now().year, dt.now().month, dt.now().day).date(),
+                                                start_date='2019-11-11',
+                                                end_date='2019-11-20',
                                                 display_format="MMMM D, YYYY",
                                                 #style={'backgroud': 'blue'},
                                             )
@@ -298,8 +287,9 @@ def build_tab_1():
                                         dcc.Dropdown(
                                             id="ruta-dropdown",
                                             options=[
-                                                {"label": dia, "value": idx}
-                                                for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
+                                                {"label": dia, "value": dia}
+                                                for idx, dia in enumerate(day)
+                                                #for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
                                             ],
                                             multi=True,
                                             placeholder="Dia",
@@ -325,7 +315,6 @@ def build_tab_1():
                                         )
                                     ],
                                 ),
-                                html.Button('Limpiar', id='limpiar-descripcion', n_clicks=0),
                             ],
                         ),
                     ],
@@ -334,7 +323,7 @@ def build_tab_1():
                 html.Div(
                     className="eight columns div-for-charts bg-grey",
                     children=[
-                        dcc.Graph(id="map-graph",animate=True),
+                        dcc.Graph(id="map-graph"),
                         #dcc.Graph(id="histogram"),
                     ],
                 ),
@@ -452,34 +441,23 @@ def render_tab_content(tab_switch):
         Input("hour-selector", "value")
     ],
     )
-def update_histogram(start_date, end_date, route_selected, hour_picked):
+def update_histogram(start_date, end_date, day_selected, hour_picked):
 
-    data = df.copy()
+    """import data """
+    cargaQuery.restart_query(update_map=False)
+    cargaQuery.add_date_range(start_date, end_date)
+    cargaQuery.add_day_filter(day_selected)
+    cargaQuery.add_hour_filter(hour_picked)
+    cargaQuery.last_add()
+    df_cargas = sql.request(cargaQuery.query)
 
-    if start_date and end_date:
-        data = df[(df['fecha'] >= start_date) & (df['fecha'] <= end_date)]
 
-    if route_selected:
-        data = data[df['ruta'].apply(lambda x: x in route_selected)]
-
-    xVal = []
-    yVal = []
-
-    for hour in hour_label:
-        if hour in data['hora']:
-            xVal.append(hour)
-            yVal.append(int(data['carga'][data['hora'] == hour].sum()))
-
-    xVal = pd.Series(xVal)
-    yVal = pd.Series(yVal)
-
-    colorVal = colores[:int(len(xVal))]
 
     layout = go.Layout(
         bargap=0.01,
         bargroupgap=0,
         barmode="group",
-        margin=go.layout.Margin(l=10, r=0, t=50, b=50),
+        margin=go.layout.Margin(l=10, r=10, t=50, b=50),
         showlegend=False,
         paper_bgcolor="white",
         plot_bgcolor="white",
@@ -494,18 +472,14 @@ def update_histogram(start_date, end_date, route_selected, hour_picked):
             ticksuffix=":00",
         ),
         yaxis=dict(
-        #   range=[0, max(yVal) + max(yVal) / 4],
-            showticklabels=False,
-            showgrid=False,
-            fixedrange=True,
+            range=[0, df_cargas['carga'].max()],
             rangemode="nonnegative",
-            zeroline=False,
         ),
     )
 
     return go.Figure(
         data=[
-            go.Bar(x=xVal, y=yVal, marker=dict(color=colorVal), hoverinfo="y"),
+            go.Bar(x=df_cargas['hora'], y=df_cargas['carga'], width=1, marker_color='#4682B4', hoverinfo="y"),  # marker=dict(color=colorVal),
         ],
         layout=layout,
     )
@@ -520,33 +494,25 @@ def update_histogram(start_date, end_date, route_selected, hour_picked):
         Input("hour-selector", "value")
     ],
 )
-def update_map_descripcion(start_date, end_date, route_selected, hour_picked):
+def update_map_descripcion(start_date, end_date, day_selected, hour_picked):
     zoom = 13
     latInitial = 6.2259489
     lonInitial = -75.6119972
     bearing = 0
 
-    data = df.copy()
+    """import data """
+    cargaQuery.restart_query()
+    cargaQuery.add_date_range(start_date, end_date)
+    cargaQuery.add_day_filter(day_selected)
+    cargaQuery.add_hour_filter(hour_picked)
+    cargaQuery.last_add()
+    df_cargas = sql.request(cargaQuery.query)
 
-    """import data"""
-    df_arcos = pd.read_csv('Tablas/arcos.csv', index_col=0)
-    df_cargas = pd.read_csv('Tablas/tabla_consulta.csv', index_col=0)
 
     """Assign loads to the streets"""
-    df_cargas.drop_duplicates(subset=['Arco'], inplace=True)
-    df_full = df_arcos.merge(df_cargas, how='left', on='Arco', validate="m:1")
-
-    if start_date and end_date:
-        try:
-            data = data[(data['fecha'] >= start_date) & (data['fecha'] <= end_date)]
-        except:
-            pass
-
-    if route_selected:
-        data = data[data['ruta'].apply(lambda x: x in route_selected)]
-
-    if hour_picked:
-        data = data[data['hora'].apply(lambda x: float(x) in hour_picked)]
+    df_full = df_arcos.merge(df_cargas, how='left', left_on='arco', right_on='arco', validate="m:1")
+    df_full.dropna(inplace=True)
+    df_full['text'] = df_full.apply(lambda x:  '<b>Arco: </b> {} <br><b>Carga</b>: {}<br>'.format(x['arco'],x['carga']), axis=1)
 
     #data = add_loads(data)
     return go.Figure(
@@ -626,7 +592,7 @@ def update_click_output(button_click, close_click):
         Input("hour-selector-prediccion", "value")
     ],
 )
-def update_map_prediccion(start_date, end_date, route_selected, hour_picked):
+def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
     zoom = 10.0
     latInitial = 6.2259489
     lonInitial = -75.6119972
@@ -648,8 +614,8 @@ def update_map_prediccion(start_date, end_date, route_selected, hour_picked):
         except:
             pass
 
-    if route_selected:
-        data = data[data['ruta'].apply(lambda x: x in route_selected)]
+    if day_selected:
+        data = data[data['ruta'].apply(lambda x: x in day_selected)]
 
     if hour_picked:
         data = data[data['hora'].apply(lambda x: float(x) in hour_picked)]
