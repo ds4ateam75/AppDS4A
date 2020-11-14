@@ -47,10 +47,10 @@ class Carga_query:
     def add_day_filter(self, dia=None):
         if self.number_filters == 0 and (dia is not None and dia != []):
             self.query += 'WHERE '
-            self.query += 'DIA IN {} '.format(str(dia).replace("[", "('").replace("]", "')"))
+            self.query += 'DIA IN {} '.format(str([str(x) for x in dia]).replace("[", "(").replace("]", ")"))
         elif dia is not None and dia != []:
             self.query += 'AND '
-            self.query += 'DIA IN {} '.format(str(dia).replace("[", "('").replace("]", "')"))
+            self.query += 'DIA IN {} '.format(str([str(x) for x in dia]).replace("[", "(").replace("]", ")"))
         self.number_filters += 1
 
     def restart_query(self, update_map=True, agr='SUM'):

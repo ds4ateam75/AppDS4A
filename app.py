@@ -189,7 +189,7 @@ def build_tabs():
                 children=[
                     dcc.Tab(
                         id="Project-tab",
-                        label="Projecto",
+                        label="Proyecto",
                         value="tab1",
                         className="custom-tab",
                         selected_className="custom-tab--selected",
@@ -222,10 +222,35 @@ def build_tabs():
 
 
 def build_tab_1():
-    return (
+    return(html.Div(
+            className="row",
+            children=[
+                # Column for app graphs and plots
                 html.Div(
-                        children = [html.P('PRESENTACION AQUI')]
+                    className="eight columns div-for-charts bg-white",
+                    children=[
+                        dcc.Markdown(
+                            className='Map-text',
+                            children=(
+                                """
+                        ###### What is this mock app about?
+
+                        This is a dashboard for monitoring real-time process quality along manufacture production line.
+
+                        ###### What does this app shows
+
+                        Click on buttons in `Parameter` column to visualize details of measurement trendlines on the bottom panel.
+
+                        The sparkline on top panel and control chart on bottom panel show Shewhart process monitor using mock data.
+                        The trend is updated every other second to simulate real-time measurements. Data falling outside of six-sigma control limit are signals indicating 'Out of Control(OOC)', and will
+                        trigger alerts instantly for a detailed checkup.
+                        Operators may stop measurement by clicking on `Stop` button, and edit specification parameters by clicking specification tab."""
+                            )
                         )
+                    ],
+                ),
+            ],
+        ),
     )
 
 
@@ -278,12 +303,12 @@ def build_tab_2():
                                         className="div-for-dropdown",
                                         children = [html.P('Ingrese la fecha que desea revisar'),
                                             dcc.DatePickerRange(
-                                                id="date-picker",
-                                                #min_date_allowed=df['fecha'].min(),
-                                                #max_date_allowed=df['fecha'].max(),
-                                                initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
-                                                start_date='2019-11-11',
-                                                end_date='2019-11-20',
+                                                id="date-picker-descripcion",
+                                                min_date_allowed='2019-11-01',
+                                                max_date_allowed='2020-05-11', #  dt(dt.now().year, dt.now().month, dt.now().day),
+                                                initial_visible_month='2020-05-11',
+                                                start_date='2020-05-01',
+                                                end_date='2020-05-11',
                                                 display_format="MMMM D, YYYY",
                                                 #style={'backgroud': 'blue'},
                                             )
@@ -455,17 +480,18 @@ def build_tab_4():
                 html.Div(
                     className="four columns div-user-controls",
                     children=[
-                        html.Div(
+                    html.Div(
                             className="div-for-dropdown",
                             children = [html.P('Ingrese la fecha que desea revisar'),
                                 dcc.DatePickerRange(
-                                    id="date-picker-prediccion",
-                                    min_date_allowed=df['fecha'].min(),
-                                    max_date_allowed=df['fecha'].max(),
+                                    id="date-picker-heatmap",
+                                    #min_date_allowed=df['fecha'].min(),
+                                    #max_date_allowed=df['fecha'].max(),
                                     initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
-                                    end_date=dt(dt.now().year, dt.now().month, dt.now().day).date(),
+                                    start_date='2019-11-01',
+                                    end_date='2019-11-04',
                                     display_format="MMMM D, YYYY",
-                                    style={'backgroud': 'blue'},
+                                    #style={'backgroud': 'blue'},
                                 )
                             ],
                         ),
@@ -478,7 +504,7 @@ def build_tab_4():
                                     children=[html.P('Seleccione un dia de la semana'),
                                         # Dropdown for locations on map
                                         dcc.Dropdown(
-                                            id="ruta-dropdown-prediccion",
+                                            id="ruta-dropdown-heatmap",
                                             options=[
                                                 {"label": dia, "value": idx}
                                                 for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
@@ -494,7 +520,7 @@ def build_tab_4():
                                     children=[html.P('Ingrese la hora que desea revisar'),
                                         # Dropdown to select times
                                         dcc.Dropdown(
-                                            id="hour-selector-prediccion",
+                                            id="hour-selector-heatmap",
                                             options=[
                                                 {
                                                     "label": hour_label[value],
@@ -515,7 +541,7 @@ def build_tab_4():
                 html.Div(
                     className="eight columns div-for-charts bg-white",
                     children=[
-                        dcc.Graph(id="map-graph",animate=True),
+                        dcc.Graph(id="heatmap-graph"),
                         dcc.Markdown(
                             className='Map-text',
                             children=(
@@ -557,8 +583,8 @@ def render_tab_content(tab_switch):
 @app.callback(
     Output("histogram", "figure"),
     [
-        Input("date-picker", "start_date"),
-        Input("date-picker", "end_date"),
+        Input("date-picker-descripcion", "start_date"),
+        Input("date-picker-descripcion", "end_date"),
         Input("ruta-dropdown", "value"),
         Input("hour-selector", "value"),
         Input("Agr-selector", "value")
@@ -566,12 +592,12 @@ def render_tab_content(tab_switch):
     )
 def update_histogram(start_date, end_date, day_selected, hour_picked, agr_picked):
     """import data """
-    print(agr_picked)
     cargaQuery.restart_query(update_map=False, agr=agr_picked)
     cargaQuery.add_date_range(start_date, end_date)
     cargaQuery.add_day_filter(day_selected)
     cargaQuery.add_hour_filter(hour_picked)
     cargaQuery.last_add()
+    print(cargaQuery.query)
     df_cargas = sql.request(cargaQuery.query)
 
 
@@ -611,8 +637,8 @@ def update_histogram(start_date, end_date, day_selected, hour_picked, agr_picked
 @app.callback(
     Output("map-graph", "figure"),
     [
-        Input("date-picker", "start_date"),
-        Input("date-picker", "end_date"),
+        Input("date-picker-descripcion", "start_date"),
+        Input("date-picker-descripcion", "end_date"),
         Input("ruta-dropdown", "value"),
         Input("hour-selector", "value"),
         Input("Agr-selector", "value")
@@ -620,8 +646,8 @@ def update_histogram(start_date, end_date, day_selected, hour_picked, agr_picked
 )
 def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_picked):
     zoom = 13
-    latInitial = 6.2259489
-    lonInitial = -75.6119972
+    latInitial = 6.2482159
+    lonInitial = -75.5749031
     bearing = 0
 
     """import data """
@@ -634,10 +660,12 @@ def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_
 
     """Assign loads to the streets"""
     df_full = df_arcos.merge(df_cargas, how='left', left_on='arco', right_on='arco', validate="m:1")
+    df_full.to_csv('data_before.csv')
     df_full.dropna(inplace=True)
+    df_full.to_csv('data_after.csv')
 
     if len(df_full['carga']) != 0:
-        df_full['carga'] = df_full['carga'].astype(np.uint8)
+        df_full['carga'] = df_full['carga'].astype(int)
         df_full['text'] = df_full.apply(lambda x:  '<b>Arco: </b> {} <br><b>Carga</b>: {}<br>'.format(x['arco'], x['carga']), axis=1)
     else:
         df_full['text'] = None
@@ -820,86 +848,114 @@ def update_click_output(button_click):
 @app.callback(
     Output("heatmap-graph", "figure"),
     [
-        Input("date-picker", "start_date"),
-        Input("date-picker", "end_date"),
-        Input("ruta-dropdown", "value"),
-        Input("hour-selector", "value"),
-        Input("Agr-selector", "value")
+        Input("date-picker-heatmap", "start_date"),
+        Input("date-picker-heatmap", "end_date"),
+        Input("ruta-dropdown-heatmap", "value"),
+        Input("hour-selector-heatmap", "value")
     ],
 )
-def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_picked):
+def update_heatmap(start_date, end_date, day_selected, hour_picked):
     zoom = 13
-    latInitial = 6.2259489
-    lonInitial = -75.6119972
+    latInitial = 6.2482159
+    lonInitial = -75.5749031
     bearing = 0
 
-    """import data """
-    cargaQuery.restart_query(agr=agr_picked)
-    cargaQuery.add_date_range(start_date, end_date)
-    cargaQuery.add_day_filter(day_selected)
-    cargaQuery.add_hour_filter(hour_picked)
-    cargaQuery.last_add()
-    df_cargas = sql.request(cargaQuery.query)
+    query = '''
+    SELECT  latitud_corr, longitud_corr, (subendelantera + subentrasera + bajandelantera + bajantrasera) AS MOVIMIENTOS FROM GENERAL WHERE (FECHA_REGISTRO BETWEEN '2019-11-11' AND '2019-11-20');
+    '''
 
-    """Assign loads to the streets"""
-    df_full = df_arcos.merge(df_cargas, how='left', left_on='arco', right_on='arco', validate="m:1")
-    df_full.dropna(inplace=True)
+    data = sql.request(query)
+    index_to_drop = data[data['movimientos'] <= 0].index
+    data.drop(index=index_to_drop, axis=0, inplace=True)
 
-    if len(df_full['carga']) != 0:
-        df_full['carga'] = df_full['carga'].astype(np.uint8)
-        df_full['text'] = df_full.apply(lambda x:  '<b>Arco: </b> {} <br><b>Carga</b>: {}<br>'.format(x['arco'], x['carga']), axis=1)
-    else:
-        df_full['text'] = None
-    return go.Figure(
-        data=[
-            map_links(df_full)  # Plot all streets
-        ],
-        layout=Layout(
-            autosize=True,
-            margin=go.layout.Margin(l=0, r=35, t=0, b=0),
-            showlegend=False,
-            mapbox=dict(
-                accesstoken=mapbox_access_token,
-                center=dict(lat=latInitial, lon=lonInitial),
-                style="streets",
-                bearing=bearing,
-                zoom=zoom,
-            ),
-            updatemenus=[
-                dict(
-                    buttons=(
-                        [
-                            dict(
-                                args=[
-                                    {
-                                        "mapbox.zoom": 12,
-                                        "mapbox.center.lon": "-73.991251",
-                                        "mapbox.center.lat": "40.7272",
-                                        "mapbox.bearing": 0,
-                                        "mapbox.style": "streets",
-                                    }
-                                ],
-                                label="Reset Zoom",
-                                method="relayout",
-                            )
-                        ]
+    return(
+        go.Figure(
+            data=[
+                go.Densitymapbox(
+                    lat=data['latitud_corr'],
+                    lon=data['longitud_corr'],
+                    z=data['movimientos'],
+                    radius=10)
+                ],
+            layout=go.Layout(
+                mapbox_style="stamen-terrain",
+                mapbox_center_lon=180,
+                margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                mapbox=dict(
+                        accesstoken=mapbox_access_token,
+                        center=dict(lat=latInitial, lon=lonInitial),
+                        style="streets",
+                        bearing=bearing,
+                        zoom=zoom,
                     ),
-                    direction="left",
-                    pad={"r": 0, "t": 0, "b": 0, "l": 0},
-                    showactive=False,
-                    type="buttons",
-                    x=0.45,
-                    y=0.02,
-                    xanchor="left",
-                    yanchor="bottom",
-                    bgcolor="#323130",
-                    borderwidth=3,
-                    bordercolor="#6d6d6d",
-                    font=dict(color="#FFFFFF"),
+                updatemenus=[
+                    dict(
+                        buttons=(
+                            [
+                                dict(
+                                    args=[
+                                        {
+                                            "mapbox.zoom": 12,
+                                            "mapbox.center.lon": "-73.991251",
+                                            "mapbox.center.lat": "40.7272",
+                                            "mapbox.bearing": 0,
+                                            "mapbox.style": "streets",
+                                        }
+                                    ],
+                                    label="Reset Zoom",
+                                    method="relayout",
+                                )
+                            ]
+                        ),
+                        direction="left",
+                        pad={"r": 0, "t": 0, "b": 0, "l": 0},
+                        showactive=False,
+                        type="buttons",
+                        x=0.45,
+                        y=0.02,
+                        xanchor="left",
+                        yanchor="bottom",
+                        bgcolor="#323130",
+                        borderwidth=3,
+                        bordercolor="#6d6d6d",
+                        font=dict(color="#FFFFFF"),
+                    )
+                ],
                 )
-            ],
-        ),
+            )
     )
+
+    # quakes = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv')
+
+    # fig = go.Figure(go.Densitymapbox(lat=quakes.Latitude, lon=quakes.Longitude, z=quakes.Magnitude,
+    #                                 radius=10))
+    # fig.update_layout(mapbox_style="stamen-terrain", mapbox_center_lon=180)
+    # fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    # return fig
+    # zoom = 13
+    # latInitial = 6.2259489
+    # lonInitial = -75.6119972
+    # bearing = 0
+
+    # """import data """
+    # cargaQuery.restart_query(agr=agr_picked)
+    # cargaQuery.add_date_range(start_date, end_date)
+    # cargaQuery.add_day_filter(day_selected)
+    # cargaQuery.add_hour_filter(hour_picked)
+    # cargaQuery.last_add()
+    # df_cargas = sql.request(cargaQuery.query)
+    # df_full.to_csv('cargas.csv')
+
+    # """Assign loads to the streets"""
+    # df_full = df_arcos.merge(df_cargas, how='left', left_on='arco', right_on='arco', validate="m:1")
+    # df_full.dropna(inplace=True)
+
+
+    # if len(df_full['carga']) != 0:
+    #     df_full['carga'] = df_full['carga'].astype(np.uint8)
+    #     df_full['text'] = df_full.apply(lambda x:  '<b>Arco: </b> {} <br><b>Carga</b>: {}<br>'.format(x['arco'], x['carga']), axis=1)
+    # else:
+    #     df_full['text'] = None
 
 
 #

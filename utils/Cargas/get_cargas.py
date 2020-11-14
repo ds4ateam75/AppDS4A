@@ -227,8 +227,8 @@ if __name__ == "__main__":
 
     """datetime object containing current date and time"""
 
-    lastUpdate_Time = datetime.strptime('2019-11-02', '%Y-%m-%d').date() # START DATE 2019-11-02
-    stop_date = datetime.strptime('2019-11-03', '%Y-%m-%d').date() # STOP DATE 2020-05-11
+    lastUpdate_Time = datetime.strptime('2020-04-25', '%Y-%m-%d').date() # START DATE 2019-11-02
+    stop_date = datetime.strptime('2020-05-12', '%Y-%m-%d').date() # STOP DATE 2020-05-11
     # stop_date =  datetime.now().date()
 
     while stop_date != lastUpdate_Time:
@@ -275,4 +275,4 @@ if __name__ == "__main__":
 
             lastUpdate_Time = day_after
 
-        logging.info('--------------------------')
+            logging.info('--------------------------')
