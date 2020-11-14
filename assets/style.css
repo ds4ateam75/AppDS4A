@@ -330,7 +330,13 @@ body {
   width: 60vw;
   margin: 10% auto;
   padding: 10px 15px;
-  background-color:  #98c93ca1;
+  background-color:  #98c93c;
+}
+
+.Map-text {
+  padding: 10px 15px;
+  background-color: white;
+  width: 60vw;
 }
 
 .close-container {
@@ -369,7 +375,7 @@ body {
   cursor: pointer;
 }
 
-#Specs-tab.custom-tab, #Control-chart-tab.custom-tab {
+#Specs-tab.custom-tab, #Control-chart-tab.custom-tab, #Control-heatmap.custom-tab, #Project-tab.custom-tab{
   background-color: #97c93c;
   letter-spacing: 1px;
   color: inherit;
@@ -381,19 +387,12 @@ body {
   justify-content: center;
   cursor: pointer;
   height: 18px;
+  margin: 1.5px;
 }
 
-#Specs-tab.custom-tab--selected, #Control-chart-tab.custom-tab--selected {
+#Specs-tab.custom-tab--selected, #Control-chart-tab.custom-tab--selected, #Control-heatmap.custom-tab--selected, #Project-tab.custom-tab--selected{
   color:#006c9e;
   border-bottom: #006c9e solid 4px !important;
-}
-
-#Specs-tab.custom-tab {
-  margin-right: 3px;
-}
-
-#Control-chart-tab.custom-tab {
-  margin-left: 3px;
 }
 
 .section-banner {
