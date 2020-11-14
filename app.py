@@ -208,13 +208,6 @@ def build_tabs():
                         className="custom-tab",
                         selected_className="custom-tab--selected",
                     ),
-                    dcc.Tab(
-                        id="Control-heatmap",
-                        label="Subidas y bajadas",
-                        value="tab4",
-                        className="custom-tab",
-                        selected_className="custom-tab--selected",
-                    ),
                 ],
             )
         ],
@@ -472,91 +465,6 @@ def build_tab_3():
     )
 
 
-def build_tab_4():
-    return(html.Div(
-            className="row",
-            children=[
-                # Column for user controls
-                html.Div(
-                    className="four columns div-user-controls",
-                    children=[
-                    html.Div(
-                            className="div-for-dropdown",
-                            children = [html.P('Ingrese la fecha que desea revisar'),
-                                dcc.DatePickerRange(
-                                    id="date-picker-heatmap",
-                                    #min_date_allowed=df['fecha'].min(),
-                                    #max_date_allowed=df['fecha'].max(),
-                                    initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
-                                    start_date='2019-11-01',
-                                    end_date='2019-11-04',
-                                    display_format="MMMM D, YYYY",
-                                    #style={'backgroud': 'blue'},
-                                )
-                            ],
-                        ),
-                        # Change to side-by-side for mobile layout
-                        html.Div(
-                            className="row",
-                            children=[
-                                html.Div(
-                                    className="div-for-dropdown",
-                                    children=[html.P('Seleccione un dia de la semana'),
-                                        # Dropdown for locations on map
-                                        dcc.Dropdown(
-                                            id="ruta-dropdown-heatmap",
-                                            options=[
-                                                {"label": dia, "value": idx}
-                                                for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
-                                            ],
-                                            multi=True,
-                                            placeholder="Dia",
-                                            searchable=True
-                                        )
-                                    ],
-                                ),
-                                html.Div(
-                                    className="div-for-dropdown",
-                                    children=[html.P('Ingrese la hora que desea revisar'),
-                                        # Dropdown to select times
-                                        dcc.Dropdown(
-                                            id="hour-selector-heatmap",
-                                            options=[
-                                                {
-                                                    "label": hour_label[value],
-                                                    "value": value,
-                                                }
-                                                for value in hour_label.keys()
-                                            ],
-                                            multi=True,
-                                            placeholder="Hora del dia",
-                                        )
-                                    ],
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
-                # Column for app graphs and plots
-                html.Div(
-                    className="eight columns div-for-charts bg-white",
-                    children=[
-                        dcc.Graph(id="heatmap-graph"),
-                        dcc.Markdown(
-                            className='Map-text',
-                            children=(
-                                """
-                        ###### DESCRIPCION DE HEATMAP AQUI
-                        """
-                            )
-                        )
-                    ],
-                ),
-            ],
-        ),
-    )
-
-
 #
 # # CALLBACKS
 #
@@ -572,10 +480,9 @@ def render_tab_content(tab_switch):
         return build_tab_1()
     elif tab_switch == "tab2":
         return build_tab_2()
-    elif tab_switch == "tab3":
-        return build_tab_3()
     else:
-        return build_tab_4()
+        return build_tab_3()
+
 
 # # Descripcion
 
@@ -597,7 +504,6 @@ def update_histogram(start_date, end_date, day_selected, hour_picked, agr_picked
     cargaQuery.add_day_filter(day_selected)
     cargaQuery.add_hour_filter(hour_picked)
     cargaQuery.last_add()
-    print(cargaQuery.query)
     df_cargas = sql.request(cargaQuery.query)
 
 
@@ -611,7 +517,6 @@ def update_histogram(start_date, end_date, day_selected, hour_picked, agr_picked
         paper_bgcolor="white",
         plot_bgcolor="white",
         title="Carga total por hora",
-        #dragmode="select",
         font=dict(color="black"),
         xaxis=dict(
             range=[-0.5, 23.5],
@@ -628,7 +533,7 @@ def update_histogram(start_date, end_date, day_selected, hour_picked, agr_picked
 
     return go.Figure(
         data=[
-            go.Bar(x=df_cargas['hora'], y=df_cargas['carga'], width=1, marker_color='#4682B4', hoverinfo="y"),  # marker=dict(color=colorVal),
+            go.Bar(x=df_cargas['hora'], y=df_cargas['carga'], width=1, marker_color='#4682B4', hoverinfo="y"),
         ],
         layout=layout,
     )
@@ -720,20 +625,6 @@ def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_
         ),
     )
 
-
-@app.callback(
-    Output("markdown", "style"),
-    [Input("Description-button", "n_clicks"), Input("markdown_close", "n_clicks")],
-)
-def update_click_output(button_click, close_click):
-    ctx = dash.callback_context
-
-    if ctx.triggered:
-        prop_id = ctx.triggered[0]["prop_id"].split(".")[0]
-        if prop_id == "Description-button":
-            return {"display": "block"}
-
-    return {"display": "none"}
 
 # # Prediccion
 
@@ -843,121 +734,6 @@ def update_click_output(button_click):
                     )
 
 
-# # Subidas y bajadas
-
-@app.callback(
-    Output("heatmap-graph", "figure"),
-    [
-        Input("date-picker-heatmap", "start_date"),
-        Input("date-picker-heatmap", "end_date"),
-        Input("ruta-dropdown-heatmap", "value"),
-        Input("hour-selector-heatmap", "value")
-    ],
-)
-def update_heatmap(start_date, end_date, day_selected, hour_picked):
-    zoom = 13
-    latInitial = 6.2482159
-    lonInitial = -75.5749031
-    bearing = 0
-
-    query = '''
-    SELECT  latitud_corr, longitud_corr, (subendelantera + subentrasera + bajandelantera + bajantrasera) AS MOVIMIENTOS FROM GENERAL WHERE (FECHA_REGISTRO BETWEEN '2019-11-11' AND '2019-11-20');
-    '''
-
-    data = sql.request(query)
-    index_to_drop = data[data['movimientos'] <= 0].index
-    data.drop(index=index_to_drop, axis=0, inplace=True)
-
-    return(
-        go.Figure(
-            data=[
-                go.Densitymapbox(
-                    lat=data['latitud_corr'],
-                    lon=data['longitud_corr'],
-                    z=data['movimientos'],
-                    radius=10)
-                ],
-            layout=go.Layout(
-                mapbox_style="stamen-terrain",
-                mapbox_center_lon=180,
-                margin={"r": 0, "t": 0, "l": 0, "b": 0},
-                mapbox=dict(
-                        accesstoken=mapbox_access_token,
-                        center=dict(lat=latInitial, lon=lonInitial),
-                        style="streets",
-                        bearing=bearing,
-                        zoom=zoom,
-                    ),
-                updatemenus=[
-                    dict(
-                        buttons=(
-                            [
-                                dict(
-                                    args=[
-                                        {
-                                            "mapbox.zoom": 12,
-                                            "mapbox.center.lon": "-73.991251",
-                                            "mapbox.center.lat": "40.7272",
-                                            "mapbox.bearing": 0,
-                                            "mapbox.style": "streets",
-                                        }
-                                    ],
-                                    label="Reset Zoom",
-                                    method="relayout",
-                                )
-                            ]
-                        ),
-                        direction="left",
-                        pad={"r": 0, "t": 0, "b": 0, "l": 0},
-                        showactive=False,
-                        type="buttons",
-                        x=0.45,
-                        y=0.02,
-                        xanchor="left",
-                        yanchor="bottom",
-                        bgcolor="#323130",
-                        borderwidth=3,
-                        bordercolor="#6d6d6d",
-                        font=dict(color="#FFFFFF"),
-                    )
-                ],
-                )
-            )
-    )
-
-    # quakes = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv')
-
-    # fig = go.Figure(go.Densitymapbox(lat=quakes.Latitude, lon=quakes.Longitude, z=quakes.Magnitude,
-    #                                 radius=10))
-    # fig.update_layout(mapbox_style="stamen-terrain", mapbox_center_lon=180)
-    # fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    # return fig
-    # zoom = 13
-    # latInitial = 6.2259489
-    # lonInitial = -75.6119972
-    # bearing = 0
-
-    # """import data """
-    # cargaQuery.restart_query(agr=agr_picked)
-    # cargaQuery.add_date_range(start_date, end_date)
-    # cargaQuery.add_day_filter(day_selected)
-    # cargaQuery.add_hour_filter(hour_picked)
-    # cargaQuery.last_add()
-    # df_cargas = sql.request(cargaQuery.query)
-    # df_full.to_csv('cargas.csv')
-
-    # """Assign loads to the streets"""
-    # df_full = df_arcos.merge(df_cargas, how='left', left_on='arco', right_on='arco', validate="m:1")
-    # df_full.dropna(inplace=True)
-
-
-    # if len(df_full['carga']) != 0:
-    #     df_full['carga'] = df_full['carga'].astype(np.uint8)
-    #     df_full['text'] = df_full.apply(lambda x:  '<b>Arco: </b> {} <br><b>Carga</b>: {}<br>'.format(x['arco'], x['carga']), axis=1)
-    # else:
-    #     df_full['text'] = None
-
-
 #
 # # LAYOUT DASH APP
 #
@@ -972,8 +748,8 @@ app.layout = html.Div(
         )
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
-#     app.run_server(host='0.0.0.0')
+    #  app.run_server(debug=True)
+    app.run_server(host='0.0.0.0')
 
 
 # -----------------------------------------------------------
