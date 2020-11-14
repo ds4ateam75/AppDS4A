@@ -19,7 +19,7 @@ from utils.query_utils import Sql, Carga_query, Arco_query
 #
 
 app = dash.Dash(
-    _name__,
+    __name__,
     meta_tags=[{"name": "viewport",
                 "content": "width=device-width"}],
     suppress_callback_exceptions=True
@@ -153,8 +153,7 @@ def build_banner():
             html.Div(
                 id = 'Banner - Text',
                 children =[
-                    html.H2("Carga de Pasajeros"),
-                    html.H6("Área metropolitana del Valle de Aburrá")
+                    html.H2("Understanding Transit Loads"),
                     ]
                 ),
             html.Div(
@@ -725,8 +724,6 @@ def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
     lonInitial = -75.6119972
     bearing = 0
 
-    data = df.copy()
-
     """import data"""
     df_arcos = pd.read_csv('Tablas/arcos.csv', index_col=0)
     df_cargas = pd.read_csv('Tablas/tabla_consulta.csv', index_col=0)
@@ -816,6 +813,93 @@ def update_click_output(button_click):
                                 title="TITULO_AQUI"
                                 )
                     )
+
+
+# # Subidas y bajadas
+
+@app.callback(
+    Output("heatmap-graph", "figure"),
+    [
+        Input("date-picker", "start_date"),
+        Input("date-picker", "end_date"),
+        Input("ruta-dropdown", "value"),
+        Input("hour-selector", "value"),
+        Input("Agr-selector", "value")
+    ],
+)
+def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_picked):
+    zoom = 13
+    latInitial = 6.2259489
+    lonInitial = -75.6119972
+    bearing = 0
+
+    """import data """
+    cargaQuery.restart_query(agr=agr_picked)
+    cargaQuery.add_date_range(start_date, end_date)
+    cargaQuery.add_day_filter(day_selected)
+    cargaQuery.add_hour_filter(hour_picked)
+    cargaQuery.last_add()
+    df_cargas = sql.request(cargaQuery.query)
+
+    """Assign loads to the streets"""
+    df_full = df_arcos.merge(df_cargas, how='left', left_on='arco', right_on='arco', validate="m:1")
+    df_full.dropna(inplace=True)
+
+    if len(df_full['carga']) != 0:
+        df_full['carga'] = df_full['carga'].astype(np.uint8)
+        df_full['text'] = df_full.apply(lambda x:  '<b>Arco: </b> {} <br><b>Carga</b>: {}<br>'.format(x['arco'], x['carga']), axis=1)
+    else:
+        df_full['text'] = None
+    return go.Figure(
+        data=[
+            map_links(df_full)  # Plot all streets
+        ],
+        layout=Layout(
+            autosize=True,
+            margin=go.layout.Margin(l=0, r=35, t=0, b=0),
+            showlegend=False,
+            mapbox=dict(
+                accesstoken=mapbox_access_token,
+                center=dict(lat=latInitial, lon=lonInitial),
+                style="streets",
+                bearing=bearing,
+                zoom=zoom,
+            ),
+            updatemenus=[
+                dict(
+                    buttons=(
+                        [
+                            dict(
+                                args=[
+                                    {
+                                        "mapbox.zoom": 12,
+                                        "mapbox.center.lon": "-73.991251",
+                                        "mapbox.center.lat": "40.7272",
+                                        "mapbox.bearing": 0,
+                                        "mapbox.style": "streets",
+                                    }
+                                ],
+                                label="Reset Zoom",
+                                method="relayout",
+                            )
+                        ]
+                    ),
+                    direction="left",
+                    pad={"r": 0, "t": 0, "b": 0, "l": 0},
+                    showactive=False,
+                    type="buttons",
+                    x=0.45,
+                    y=0.02,
+                    xanchor="left",
+                    yanchor="bottom",
+                    bgcolor="#323130",
+                    borderwidth=3,
+                    bordercolor="#6d6d6d",
+                    font=dict(color="#FFFFFF"),
+                )
+            ],
+        ),
+    )
 
 
 #
