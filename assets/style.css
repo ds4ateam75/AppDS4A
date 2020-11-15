@@ -154,6 +154,7 @@ a {
  }
   h1, h2, h3, p {
       text-align: center;
+      
  }
   body {
       display: block;
@@ -325,18 +326,12 @@ body {
   background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
-/* Modal Content/Box */
-.markdown-container {
-  width: 60vw;
-  margin: 10% auto;
-  padding: 10px 15px;
-  background-color:  #98c93c;
-}
 
 .Map-text {
-  padding: 10px 15px;
+  /**padding: 10px 15px**/;
   background-color: white;
-  width: 60vw;
+  width: 80%;
+  /**width: 60vw;**/
 }
 
 .close-container {
@@ -832,6 +827,7 @@ body {
 
   #banner-text {
     text-align: center;
+    
   }
 
   .banner h5 {
@@ -1040,4 +1036,80 @@ body {
     #b6701e 50%, 
     #b6701e 100%
   );
+}
+
+
+.header-h3 {
+  padding: 30px;
+  text-align: center;
+  background-color: #006c9e;
+  color: white;
+  text-shadow: 3px 3px #000000;
+  font-size: 25px;
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+  
+}
+
+.header-h3:hover {
+  transform-origin: center bottom;
+  transform: rotateX(-7deg) translateY(10%);
+}
+
+
+.p-text{
+  margin-left: 15%;
+  margin-right: 15%;
+  margin-bottom: 5%;
+  -webkit-box-shadow: 20px 22px 38px -30px rgba(0,0,0,0.75);
+  -moz-box-shadow: 20px 22px 38px -30px rgba(0,0,0,0.75);
+  box-shadow: 20px 22px 38px -30px rgba(0,0,0,0.75);
+  border: 3px dotted #3a7999;
+  color: #3a7999;
+  background-color: whitesmoke;
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+   -ms-transition: all 1s ease;
+  -o-transition: all 1s ease;
+   transition: all 1s ease;
+   padding: 5%;
+   text-align:center;
+   transform-origin: center bottom;
+   transform: rotateX(-10deg) translateY(15%);
+   font-size: 18px
+}
+
+.p-text:hover {
+  border: 3px dotted  #97c93c;
+  color: #093008;
+  border: 10px solid #fff;
+  border-radius: 0.3%;
+ -webkit-box-shadow: 0 0 40px#97c93c, inset 0 0 40px rgba(255,255,255,1);
+ -moz-box-shadow: 0 0 40px #97c93c, inset 0 0 40px rgba(255,255,255,1);
+ box-shadow: 0 0 40px #97c93c, inset 0 0 40px rgba(255,255,255,1);
+ transform-origin: center bottom;
+ transform: rotateX(0deg) translateY(0%);
+
+}
+
+.img-team {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  -webkit-transition: all 1s ease;
+  -moz-transition: all 1s ease;
+}
+
+.img-team:hover{
+  transform-origin: center bottom;
+  transform: rotateX(-7deg) translateY(3%);
+}
+
+/* Modal Content/Box */
+.markdown-container {
+  width: 60vw;
+  margin: 10% auto;
+  padding: 10px 15px;
+  background-color:  #98c93c;
 }

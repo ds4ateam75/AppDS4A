@@ -12,6 +12,7 @@ from plotly.graph_objs import *
 from datetime import datetime as dt
 import numpy as np
 from utils.query_utils import Sql, Carga_query, Arco_query
+import dash_bootstrap_components as dbc
 
 
 #
@@ -81,19 +82,23 @@ def generate_modal():
                         className="markdown-text",
                         children=dcc.Markdown(
                             children=(
-                                """
-                        ###### What is this mock app about?
+                            """
+                            ###### ¿De qué se trata esta App?
 
-                        This is a dashboard for monitoring real-time process quality along manufacture production line.
+                            Este es un tablero para monitorear la carga de pasajeros en el sistema de transporte público del valle de Aburrá y predecir cargar teniendo el cuenta el histórico de datos de carga.
 
-                        ###### What does this app shows
+                            ###### ¿Qué se muestra en esta App?
 
-                        Click on buttons in `Parameter` column to visualize details of measurement trendlines on the bottom panel.
+                            Esta aplicación tiene tres pestañas. La primera pestaña 'Proyecto' describe las generalidades del proyecto, la funcionalidad de la aplicación y las personas encargadas de su desarrollo.
+                            Presiona clic en la pestaña 'Proyecto' para explorar a profundidad la descripción previa.
 
-                        The sparkline on top panel and control chart on bottom panel show Shewhart process monitor using mock data.
-                        The trend is updated every other second to simulate real-time measurements. Data falling outside of six-sigma control limit are signals indicating 'Out of Control(OOC)', and will
-                        trigger alerts instantly for a detailed checkup.
-                        Operators may stop measurement by clicking on `Stop` button, and edit specification parameters by clicking specification tab."""
+                            La segunda pestaña 'Descripción' muestra el histórico de cargas de pasajeros en el Valle de Aburrá. Puedes seleccionar un rango de fechas donde quieras ver la carga. Adicionalmente, puedes filtrar esta búsqueda por días y horas.
+                            Esta búsqueda muestra un histograma de distribución de carga en el valle de Aburrá en las diferentes horas del día y un mapa explícito del valle de Aburrá con los valores exactos de carga en distintos puntos. Colocando el cursos sobre los puntos del mapa, puedes ver el valor de carga exacto en ese punto. 
+                            Presiona clic en la pestaña 'Descripción' para explorar a profundidad la descripción previa.
+
+                            La tercera pestaña 'Predicción' muestra una predicción del valor de carga basado en la recolección de datos históricos, mostrándolos como carga baja, media o alta.
+                            Presiona clic en la pestaña 'Predicción' para explorar a profundidad la descripción previa.
+                            """
                             )
                         ),
                     ),
@@ -215,33 +220,100 @@ def build_tabs():
 
 
 def build_tab_1():
+
     return(html.Div(
             className="row",
             children=[
-                # Column for app graphs and plots
                 html.Div(
-                    className="eight columns div-for-charts bg-white",
+                    className="parallax__group",
                     children=[
-                        dcc.Markdown(
-                            className='Map-text',
-                            children=(
-                                """
-                        ###### What is this mock app about?
-
-                        This is a dashboard for monitoring real-time process quality along manufacture production line.
-
-                        ###### What does this app shows
-
-                        Click on buttons in `Parameter` column to visualize details of measurement trendlines on the bottom panel.
-
-                        The sparkline on top panel and control chart on bottom panel show Shewhart process monitor using mock data.
-                        The trend is updated every other second to simulate real-time measurements. Data falling outside of six-sigma control limit are signals indicating 'Out of Control(OOC)', and will
-                        trigger alerts instantly for a detailed checkup.
-                        Operators may stop measurement by clicking on `Stop` button, and edit specification parameters by clicking specification tab."""
-                            )
+                        html.H3(
+                            className="header-h3",
+                            children="""
+                            💡 Acerca del proyecto
+                            """
+                        ),
+                        html.P(
+                            className="p-text",
+                            children="""
+                            En Colombia 🇨🇴, los sistemas de transporte público son fundamentales para la movilidad de las personas y una planeación más acertada
+                            sobre las decisiones que se hacen sobre estos sistemas mejoraría la calidad de la vida de las personas significativamente. Es por
+                            lo anterior que el área metropolitana del Valle de Aburrá (AMVA) ha hecho esfuerzos para mejorar la calidad del servicio que se
+                            presta en esta área."""
+                        ),
+                        html.P(
+                            className="p-text",
+                            children=
+                            """El equipo 75 y el AMVA, hemos trabajado de la mano para llevar a cabo un proyecto que se proyecte a ser una de las herramientas más
+                            importantes a la hora de realizar planeaciones en el área metropolitana. El objetivo del proyecto fue realizar esta aplicación la
+                            cual muestra la cantidad de pasajeros (carga) dado un rango de fecha, día y hora y predice cargas de acuerdo con históricos de datos.
+                            El objetivo de este convenio es poder mostrar de manera dinámica el comportamiento del transporte público y que se puedan realizar
+                            esfuerzos de manera objetiva a mejorar el transporte público para así incentivar su uso."""),
+                        html.P(
+                            className="p-text",
+                            children="""
+                            ¡Esperamos que encuentren muy útil esta aplicación y que juntos podamos ayudar a mejorar este país!🚀
+                            """
                         )
                     ],
                 ),
+
+                html.Div(
+                    className="parallax__group",
+                    children=[
+                        html.H3(
+                            className="header-h3",
+                            children="""
+                            🤷 ¿Qué se muestra en esta App?
+                            """
+                        ),
+                        html.P(
+                            className="p-text",
+                            children="""
+                            Esta aplicación tiene tres pestañas. La primera pestaña 'Proyecto' describe las generalidades del proyecto, la funcionalidad de la
+                            aplicación y las personas encargadas de su desarrollo. \n\n\n\n\n Presiona clic en la pestaña 'Proyecto' para explorar a profundidad la descripción previa."""),
+                        html.P(
+                            className="p-text",
+                            children="""
+                            La segunda pestaña 'Descripción' muestra el histórico de cargas de pasajeros en el Valle de Aburrá. Puedes seleccionar un rango de
+                            fechas donde quieras ver la carga. Adicionalmente, puedes filtrar esta búsqueda por días y horas 🕝.
+                            Esta búsqueda muestra un histograma de distribución de carga en el valle de Aburrá en las diferentes horas del día y un mapa explícito
+                            del valle de Aburrá con los valores exactos de carga en distintos puntos. Colocando el cursor sobre los puntos del mapa, puedes ver el
+                            valor de carga exacto en ese punto."""),
+                        html.P(
+                            className="p-text",
+                            children="""
+                            Presiona clic en la pestaña 'Descripción' para explorar a profundidad la descripción previa.
+                            La tercera pestaña 'Predicción' muestra una predicción del valor de carga basado en la recolección de datos históricos, mostrándolos como
+                            carga baja, media o alta.
+                            Presiona clic en la pestaña 'Predicción' para explorar a profundidad la descripción previa.
+                            """
+                        ),
+                    ]),
+                html.H3(
+                    className="header-h3",
+                    children="""
+                    🤝 Acerca del convenio
+                    """
+                ),
+                html.P(
+                    className="p-text",
+                    children="""
+                        Este Proyecto fue hecho mediante un convenio entre el MinTIC y Correlation One para el curso de Data Science For All.
+                        El MinTIC ha realizado esfuerzos para la educación de cientos de personas en ciencia de datos y este proyecto fue hecho
+                        gracias a ellos y a la colaboración del Área Metropolitana del Valle de Aburrá.
+                    """
+                ),
+                html.H3(
+                    className="header-h3",
+                    children="""
+                    😎 ¡Nuestro equipo!
+                    """
+                ),
+                html.Img(
+                    className="img-team",
+                    src='assets/team.png'
+                )
             ],
         ),
     )
@@ -354,7 +426,18 @@ def build_tab_2():
                             className='Map-text',
                             children=(
                                 """
-                        ###### DESCRIPCION DE MAP DE CARGAS AQUI
+                        ###### __DESCRIPCIÓN__
+
+
+                        El mapa plasma la carga de pasajeros del área metropolitana del valle de aburra en el transporte público colectivo del SITVA.
+
+                        __¿Que es?__
+                        + *Carga*: la cantidad de pasajeros que se movieron a través del arco.
+                        + *Arco*: segmento vial, delimitado por intersecciones también conocidas como cuadra.
+
+                        __¿Que significa?__
+                        + *Los puntos*: son elementos que sirven para mostrar la información del arco y la carga en el.
+                        + *El color en los puntos*: el rojo es carga alta, el amarillo carga media y el verde carga baja.
                         """
                             )
                         )
@@ -483,7 +566,19 @@ def render_tab_content(tab_switch):
     else:
         return build_tab_3()
 
+@app.callback(
+    Output("markdown", "style"),
+    [Input("Description-button", "n_clicks"), Input("markdown_close", "n_clicks")],
+)
+def update_click_output(button_click, close_click):
+    ctx = dash.callback_context
 
+    if ctx.triggered:
+        prop_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        if prop_id == "Description-button":
+            return {"display": "block"}
+
+    return {"display": "none"}
 # # Descripcion
 
 # Update Histogram Figure based on Month, Day and Times Chosen
@@ -579,7 +674,8 @@ def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_
             map_links(df_full)  # Plot all streets
         ],
         layout=Layout(
-            autosize=True,
+            autosize=False,
+            hovermode='closest',
             margin=go.layout.Margin(l=0, r=35, t=0, b=0),
             showlegend=False,
             mapbox=dict(
@@ -748,8 +844,8 @@ app.layout = html.Div(
         )
 
 if __name__ == '__main__':
-    #  app.run_server(debug=True)
-    app.run_server(host='0.0.0.0')
+    app.run_server(debug=True)
+    #app.run_server(host='0.0.0.0')
 
 
 # -----------------------------------------------------------
