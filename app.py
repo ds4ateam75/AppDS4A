@@ -550,7 +550,6 @@ def build_tab_3():
                                         )
                                     ],
                                 ),
-                                html.Button('Limpiar', id='limpiar-prediccion', n_clicks=0),
                             ],
                         ),
                     ],
@@ -884,12 +883,16 @@ def violin_plot( day_selected, hour_picked,start_date,end_date):
     PrediccionQuery.add_hour_filter(hour_picked)
 
     df =Sql().request(PrediccionQuery.query) 
-    
+
 
     colores = ['#cc3232','#db7b2b','#e7b416','#99c140','#2dc937']
-    
+
     layout = go.Layout(
-        title="Clasificación de niveles de carga"    
+        title="Clasificación de niveles de carga",
+        margin=go.layout.Margin(l=10, r=10, t=50, b=50),
+        showlegend=False,
+        paper_bgcolor="white",
+        plot_bgcolor="white",
     )
 
     fig = go.Figure(layout = layout)

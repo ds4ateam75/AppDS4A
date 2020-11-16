@@ -257,7 +257,7 @@ body {
 
 .banner {
   height: fit-content;
-  background-color: #97c93c;
+  background-color: rgb(182 217 65);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -371,7 +371,7 @@ body {
 }
 
 #Specs-tab.custom-tab, #Control-chart-tab.custom-tab, #Control-heatmap.custom-tab, #Project-tab.custom-tab{
-  background-color: #97c93c;
+  background-color: rgb(182 217 65);
   letter-spacing: 1px;
   color: inherit;
   border: 0;
@@ -1111,5 +1111,5 @@ body {
   width: 60vw;
   margin: 10% auto;
   padding: 10px 15px;
-  background-color:  #98c93c;
+  background-color:  rgb(182 217 65);
 }
