@@ -793,13 +793,6 @@ def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
     data.dropna(inplace=True)
     del(df_mapa)
     
-    data['log_carga'] = np.log(data['carga']+1)
-    
-    data.loc[data['log_carga'] <= data['log_carga'].quantile(0.2) ,'cluster'] = 'baja'
-    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.2)) & (data['log_carga']<= data['log_carga'].quantile(0.4)),'cluster'] = 'media baja'
-    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.4)) & (data['log_carga']<= data['log_carga'].quantile(0.6)),'cluster'] = 'media'
-    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.6)) & (data['log_carga']<= data['log_carga'].quantile(0.8)),'cluster'] = 'media alta'
-    data.loc[data['log_carga'] > data['log_carga'].quantile(0.8),'cluster'] = 'alta'
 
     
     color_dict ={
@@ -811,9 +804,9 @@ def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
         }
     
     df = pd.DataFrame()
-    df['text'] = '<b>Nivel de Carga: '+ data['cluster'].str.capitalize() +'</b><br><b>Carga:'+data['carga'].astype('str')+'</b>'
+    df['text'] = '<b>Nivel de Carga: '+ data['nivel'].str.capitalize() +'</b><br><b>Carga:'+data['carga'].astype('str')+'</b>'
 
-    df['carga'] = data['cluster'].apply(lambda x: color_dict[x]) 
+    df['carga'] = data['nivel'].apply(lambda x: color_dict[x]) 
     df['latitud'] = data['latitud']
     df['longitud'] = data['longitud']
     
@@ -892,13 +885,6 @@ def violin_plot( day_selected, hour_picked,start_date,end_date):
 
     df =Sql().request(PrediccionQuery.query) 
     
-    df['log_carga'] = np.log(df['carga'] +1) 
-    
-    df.loc[df['log_carga'] <= df['log_carga'].quantile(0.2) ,'cluster'] = 'baja'
-    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.2)) & (df['log_carga']<= df['log_carga'].quantile(0.4)),'cluster'] = 'media baja'
-    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.4)) & (df['log_carga']<= df['log_carga'].quantile(0.6)),'cluster'] = 'media'
-    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.6)) & (df['log_carga']<= df['log_carga'].quantile(0.8)),'cluster'] = 'media alta'
-    df.loc[df['log_carga'] > df['log_carga'].quantile(0.8),'cluster'] = 'alta'
 
     colores = ['#cc3232','#db7b2b','#e7b416','#99c140','#2dc937']
     
@@ -910,7 +896,7 @@ def violin_plot( day_selected, hour_picked,start_date,end_date):
     
 
     for nivel,color in zip(['baja','media baja','media','media alta','alta'],colores[::-1]):
-        fig.add_trace(go.Violin(y=df['carga'][df['cluster']==nivel],
+        fig.add_trace(go.Violin(y=df['carga'][df['nivel']==nivel],
                                 name = nivel,
                                 legendgroup = nivel,
                                 line_color=color))
