@@ -72,7 +72,7 @@ You can run the app on your browser at http://127.0.0.1:8050
 
 When opening the app on the browser, the first thing you should do is press the 'proyecto' tab located in the upper left part of the interface and read all about the app.
 
-![alt text](https://github.com/ds4ateam75/AppDS4A/tree/master/assets/pestana_proyecto.png?raw=true)
+![alt text](https://github.com/ds4ateam75/AppDS4A/tree/master/assets/pestana_proyecto.png)
 
 
 After reading the information, you should be prepared to use the app. If you want to review the historical data, you should go to the 'DESCRIPCION' tab and first you have to select the day and hour range where you want to see the load, and then navigate through the map in order to see the distribution of passenger load in the Valle de Aburrá.
