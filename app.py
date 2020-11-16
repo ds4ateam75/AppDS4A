@@ -11,7 +11,7 @@ from plotly import graph_objs as go
 from plotly.graph_objs import *
 from datetime import datetime as dt
 import numpy as np
-from utils.query_utils import Sql, Carga_query, Arco_query
+from utils.query_utils import Sql, Carga_query, Arco_query, Prediccion_query
 import dash_bootstrap_components as dbc
 
 
@@ -27,12 +27,30 @@ app = dash.Dash(
 )
 app.title = 'AmvApp'
 server = app.server
+linkedin_urls = [
+    'https://www.linkedin.com/in/julianlgarciap/',
+    'https://www.linkedin.com/in/moralesrronald',
+    'https://www.linkedin.com/in/sebastienlozanoforero/',
+    'https://www.linkedin.com/in/rafael-machado-molina',
+    'https://www.linkedin.com/in/josealejandrocardenas',
+    'https://www.linkedin.com/in/juan-pablo-chica-castrill%C3%B3n-1b482614a/',
+    'https://www.linkedin.com/in/andguez'
+    ]
+names = [
+    'Julián',
+    'Ronald',
+    'Sebastien',
+    'Rafael',
+    'José',
+    'Juan Pablo',
+    'Andrés'
+    ]
 
 # Start query objects
 sql = Sql()
 cargaQuery = Carga_query()
 arcoQuery = Arco_query()
-
+PrediccionQuery = Prediccion_query()
 # Could be deleted
 
 hour_label ={}
@@ -158,7 +176,11 @@ def build_banner():
             html.Div(
                 id = 'Banner - Text',
                 children =[
-                    html.H2("Understanding Transit Loads"),
+                    html.Img(
+                        className="img-logo",
+                        src = 'assets/Aburrapp_logo.jpeg',
+                        style = {'height':'20%', 'width':'70%'}
+                        )
                     ]
                 ),
             html.Div(
@@ -171,7 +193,7 @@ def build_banner():
                         ),
                     html.A([
                         html.Img(
-                            id = 'Logo',
+                            id = 'Logo_SITVA',
                             src = 'https://sim.metropol.gov.co/welcome.png'
                             )
                         ], href = 'https://www.metropol.gov.co/'
@@ -236,7 +258,7 @@ def build_tab_1():
                         html.P(
                             className="p-text",
                             children="""
-                            En Colombia 🇨🇴, los sistemas de transporte público son fundamentales para la movilidad de las personas y una planeación más acertada
+                            En Colombia, los sistemas de transporte público son fundamentales para la movilidad de las personas y una planeación más acertada
                             sobre las decisiones que se hacen sobre estos sistemas mejoraría la calidad de la vida de las personas significativamente. Es por
                             lo anterior que el área metropolitana del Valle de Aburrá (AMVA) ha hecho esfuerzos para mejorar la calidad del servicio que se
                             presta en esta área."""
@@ -313,7 +335,23 @@ def build_tab_1():
                 html.Img(
                     className="img-team",
                     src='assets/team.png'
-                )
+                ),
+                html.H3(
+                    className="header-h3",
+                    children=[
+                        html.A([
+                            html.Img(
+                                id = 'Logo_SITVA',
+                                src = 'assets/lnkd_logo.png',
+                                style = {'height':'10%', 'width':'10%'}
+                                )
+                            ],
+                            href = url,
+                            title = name)
+                        for url,name in zip(linkedin_urls,names)
+                        ]
+                ),
+                
             ],
         ),
     )
@@ -466,11 +504,10 @@ def build_tab_3():
                             children = [html.P('Ingrese la fecha que desea revisar'),
                                 dcc.DatePickerRange(
                                     id="date-picker-prediccion",
-                                    min_date_allowed=df['fecha'].min(),
-                                    max_date_allowed=df['fecha'].max(),
-                                    initial_visible_month=dt(dt.now().year, dt.now().month, dt.now().day),
-                                    end_date=dt(dt.now().year, dt.now().month, dt.now().day).date(),
-                                    display_format="MMMM D, YYYY",
+                                    min_date_allowed='2020-05-10',
+                                    max_date_allowed='2020-05-11',
+                                    start_date='2020-04-01',
+                                    end_date='2020-05-11',                                    display_format="MMMM D, YYYY",
                                     style={'backgroud': 'blue'},
                                 )
                             ],
@@ -484,7 +521,7 @@ def build_tab_3():
                                     children=[html.P('Seleccione un dia de la semana'),
                                         # Dropdown for locations on map
                                         dcc.Dropdown(
-                                            id="ruta-dropdown-prediccion",
+                                            id="day-selector-prediccion",
                                             options=[
                                                 {"label": dia, "value": idx}
                                                 for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
@@ -522,23 +559,22 @@ def build_tab_3():
                 html.Div(
                     className="eight columns div-for-charts bg-white",
                     children=[
-                        dcc.Graph(id="map-graph",animate=True),
+                        dcc.Graph(id="map-graph-prediccion",animate=True),
                         dcc.Markdown(
                             className='Map-text',
                             children=(
                                 """
-                        ###### What is this mock app about?
+                        ###### DESCRIPCIÓN
 
-                        This is a dashboard for monitoring real-time process quality along manufacture production line.
+                        El mapa plasma La clasificación de carga de pasajeros, generado por un modelo de red neuronal, del área metropolitana del valle de aburra en el transporte público colectivo del SITVA.
 
-                        ###### What does this app shows
+                        __¿Que es?__
+                        + *Carga*: la cantidad de pasajeros que se movieron a través del arco.
+                        + *Nivel de Carga*: una clasificación en escala logarítmica que se le da a la carga de pasajeros
 
-                        Click on buttons in `Parameter` column to visualize details of measurement trendlines on the bottom panel.
-
-                        The sparkline on top panel and control chart on bottom panel show Shewhart process monitor using mock data.
-                        The trend is updated every other second to simulate real-time measurements. Data falling outside of six-sigma control limit are signals indicating 'Out of Control(OOC)', and will
-                        trigger alerts instantly for a detailed checkup.
-                        Operators may stop measurement by clicking on `Stop` button, and edit specification parameters by clicking specification tab."""
+                        __¿Que significa?__
+                        + *Los puntos*: un punto georeferenciado de carga definido en una hora y día de la semana específico
+                        + *El color en los puntos*: el nivel de carga de cada ubicación geográfica, la referencia de los colores se encuentra plasmada en el gráfico de violín."""
                             )
                         )
                     ],
@@ -729,7 +765,7 @@ def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_
     [
         Input("date-picker-prediccion", "start_date"),
         Input("date-picker-prediccion", "end_date"),
-        Input("ruta-dropdown-prediccion", "value"),
+        Input("day-selector-prediccion", "value"),
         Input("hour-selector-prediccion", "value")
     ],
 )
@@ -740,29 +776,52 @@ def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
     bearing = 0
 
     """import data"""
-    df_arcos = pd.read_csv('Tablas/arcos.csv', index_col=0)
-    df_cargas = pd.read_csv('Tablas/tabla_consulta.csv', index_col=0)
+    PrediccionQuery = Prediccion_query(update_map=True)
+    PrediccionQuery.add_date_range(start_date, end_date)
+    if (day_selected != None):
+        PrediccionQuery.add_day_filter(day_selected[:1])
+    else:
+        PrediccionQuery.add_day_filter([4])
+    if (hour_picked) != None:
+        PrediccionQuery.add_hour_filter(hour_picked[:1])
+    else:
+        PrediccionQuery.add_hour_filter([18])
+    PrediccionQuery.add_group()
+    df_mapa = sql.request(PrediccionQuery.query)
+    
+    data = df_mapa.merge(df_arcos, how='left', left_on='arco', right_on='arco')
+    data.dropna(inplace=True)
+    del(df_mapa)
+    
+    data['log_carga'] = np.log(data['carga']+1)
+    
+    data.loc[data['log_carga'] <= data['log_carga'].quantile(0.2) ,'cluster'] = 'baja'
+    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.2)) & (data['log_carga']<= data['log_carga'].quantile(0.4)),'cluster'] = 'media baja'
+    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.4)) & (data['log_carga']<= data['log_carga'].quantile(0.6)),'cluster'] = 'media'
+    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.6)) & (data['log_carga']<= data['log_carga'].quantile(0.8)),'cluster'] = 'media alta'
+    data.loc[data['log_carga'] > data['log_carga'].quantile(0.8),'cluster'] = 'alta'
 
-    """Assign loads to the streets"""
-    df_cargas.drop_duplicates(subset=['Arco'], inplace=True)
-    df_full = df_arcos.merge(df_cargas, how='left', on='Arco', validate="m:1")
+    
+    color_dict ={
+        'baja':'#2dc937',
+        'media baja':'#99c140',
+        'media':'#e7b416',
+        'media alta':'#db7b2b',
+        'alta':'#cc3232'
+        }
+    
+    df = pd.DataFrame()
+    df['text'] = '<b>Nivel de Carga: '+ data['cluster'].str.capitalize() +'</b><br><b>Carga:'+data['carga'].astype('str')+'</b>'
 
-    if start_date and end_date:
-        try:
-            data = data[(data['fecha'] >= start_date) & (data['fecha'] <= end_date)]
-        except:
-            pass
+    df['carga'] = data['cluster'].apply(lambda x: color_dict[x]) 
+    df['latitud'] = data['latitud']
+    df['longitud'] = data['longitud']
+    
+    del(data)
 
-    if day_selected:
-        data = data[data['ruta'].apply(lambda x: x in day_selected)]
-
-    if hour_picked:
-        data = data[data['hora'].apply(lambda x: float(x) in hour_picked)]
-
-    #data = add_loads(data)
     return go.Figure(
         data=[
-            map_links(df_full)  # Plot all streets
+            map_links(df)  # Plot all streets
         ],
         layout=Layout(
             autosize=True,
@@ -814,22 +873,50 @@ def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
 
 @app.callback(
     Output("histogram-prediccion", "figure"),
-    [Input("limpiar-prediccion", "n_clicks")],
-)
-def update_click_output(button_click):
-    x = np.random.randn(500)
-    return go.Figure(
-                    data=[
-                        go.Histogram(x=x)
-                        ],
-                    layout=go.Layout(
-                                paper_bgcolor="white",
-                                plot_bgcolor="white",
-                                title="TITULO_AQUI"
-                                )
-                    )
+    [
+        Input("day-selector-prediccion", "value"),
+        Input("hour-selector-prediccion", "value"),
+        Input("date-picker-prediccion","start_date"),
+        Input("date-picker-prediccion","end_date")
+    ],
+    )
+def violin_plot( day_selected, hour_picked,start_date,end_date):
 
+    PrediccionQuery = Prediccion_query(update_map=False)
 
+    if start_date and end_date:
+        PrediccionQuery.add_date_range(str(start_date), str(end_date))
+
+    PrediccionQuery.add_day_filter(day_selected)
+    PrediccionQuery.add_hour_filter(hour_picked)
+
+    df =Sql().request(PrediccionQuery.query) 
+    
+    df['log_carga'] = np.log(df['carga'] +1) 
+    
+    df.loc[df['log_carga'] <= df['log_carga'].quantile(0.2) ,'cluster'] = 'baja'
+    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.2)) & (df['log_carga']<= df['log_carga'].quantile(0.4)),'cluster'] = 'media baja'
+    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.4)) & (df['log_carga']<= df['log_carga'].quantile(0.6)),'cluster'] = 'media'
+    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.6)) & (df['log_carga']<= df['log_carga'].quantile(0.8)),'cluster'] = 'media alta'
+    df.loc[df['log_carga'] > df['log_carga'].quantile(0.8),'cluster'] = 'alta'
+
+    colores = ['#cc3232','#db7b2b','#e7b416','#99c140','#2dc937']
+    
+    layout = go.Layout(
+        title="Clasificación de niveles de carga"    
+    )
+
+    fig = go.Figure(layout = layout)
+    
+
+    for nivel,color in zip(['baja','media baja','media','media alta','alta'],colores[::-1]):
+        fig.add_trace(go.Violin(y=df['carga'][df['cluster']==nivel],
+                                name = nivel,
+                                legendgroup = nivel,
+                                line_color=color))
+    fig.update_traces(box_visible=True, meanline_visible=True)
+    fig.update_yaxes(type="log")
+    return fig
 #
 # # LAYOUT DASH APP
 #
@@ -844,7 +931,7 @@ app.layout = html.Div(
         )
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
     #app.run_server(host='0.0.0.0')
 
 
