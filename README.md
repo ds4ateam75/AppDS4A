@@ -77,11 +77,15 @@ When opening the app on the browser, the first thing you should do is press the 
 
 After reading the information, you should be prepared to use the app. If you want to review the historical data, you should go to the 'DESCRIPCION' tab and first you have to select the day and hour range where you want to see the load, and then navigate through the map in order to see the distribution of passenger load in the Valle de Aburrá.
 
-#Aquí debería haber otro screenshot de la primera ventana señalando las horas y día.
+![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/descripcion1.png?raw=true)
+
+![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/descripcion2.png?raw=true)
 
 If you want to make a prediction of the load you have to go the 'PREDICCIÓN' tab and select the hour and day from which you want to make it. 
 
-#Aquí otro screenshot de la segunda ventana (la de predicciones) y señalando dónde se debe poner la hora y día de predicción.
+![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/prediccion1.png?raw=true)
+
+![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/prediccion2.png?raw=true)
 
 
 ## Credits
