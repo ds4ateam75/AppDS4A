@@ -77,14 +77,18 @@ When opening the app on the browser, the first thing you should do is press the 
 
 After reading the information, you should be prepared to use the app. If you want to review the historical data, you should go to the 'DESCRIPCION' tab and first you have to select the day and hour range where you want to see the load, and then navigate through the map in order to see the distribution of passenger load in the Valle de Aburrá.
 
+**Select** the **tab** shown in the **red box**:
 ![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/descripcion1.png?raw=true)
 
+**Select** your **day and hour range** in the options shown in the **red box**:
 ![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/descripcion2.png?raw=true)
 
 If you want to make a prediction of the load you have to go the 'PREDICCIÓN' tab and select the hour and day from which you want to make it. 
 
+**Select** the **tab** shown in the **red box**:
 ![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/prediccion1.png?raw=true)
 
+**Select** your **day and hour range** in the options shown in the **red box**:
 ![alt text](https://github.com/ds4ateam75/AppDS4A/blob/master/assets/prediccion2.png?raw=true)
 
 
@@ -92,10 +96,10 @@ If you want to make a prediction of the load you have to go the 'PREDICCIÓN' ta
 
 This application was developed by DS4A Team 75:
 
-* Andrés Rodriguez. linkedin page: https://www.linkedin.com/in/andguez 
-* Julián García. linkedin page:  
-* Ronald Morales. e-mail: 
-* Juan Chica. e-mail:
-* Sebastien Lozano. e-mail: 
-* Rafael Machado. e-mail: 
-* José Cárdenas. e-mail: jcardenas0719@gmail.com
+* Andrés Rodriguez. linkedIn page: https://www.linkedin.com/in/andguez 
+* Julián García. linkedIn page: https://www.linkedin.com/in/julianlgarciap/  
+* Ronald Morales. linkedIn page: http://linkedin.com/in/moralesrronald
+* Juan Pablo Chica. linkedIn page: https://www.linkedin.com/in/juan-pablo-chica-castrill%C3%B3n-1b482614a/
+* Sebastien Lozano. linkedIn page: https://www.linkedin.com/in/sebastienlozanoforero/
+* Rafael Machado. linkedIn page: www.linkedin.com/in/rafael-machado-molina
+* José Cárdenas. linkedIn page: https://www.linkedin.com/in/josealejandrocardenas
