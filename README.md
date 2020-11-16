@@ -6,13 +6,12 @@
 * [Technologies](#Technologies)
 * [How to run this app](#How-to-run-this-app)
 * [How to use](#How-to-use)
-* [Screenshots](#Screenshots)
 * [Resources](#Resources)
 * [Credits](#Credits)
 
 ## About this app
 
-AMVAPP is a web application that is used to visualize passenger load data in the public transport service of Valle de Aburrá.
+ABURRAPP is a web application that is used to visualize passenger load data in the public transport service of Valle de Aburrá.
 With this application, the load can be seen in different hour and day ranges. 
 
 The application has two main approaches:
@@ -73,29 +72,25 @@ You can run the app on your browser at http://127.0.0.1:8050
 
 ## How to use
 
-When opening the app on the browser, the first thing you should do is press the 'proyect tab0 located in the upper left part of the interface.
+When opening the app on the browser, the first thing you should do is press the 'proyecto' tab located in the upper left part of the interface and read all about the app.
 
-#Aquí debería ir un screenshot de la app indicando el botón de información.
 
-After reading the information, you should be prepared to use the app. If you want to review the historical data, first you have to select the day and hour range where you want to see the load, and then navigate through the map in order to see the distribution of passenger load in the Valle de Aburrá.
+
+After reading the information, you should be prepared to use the app. If you want to review the historical data, you should go to the 'DESCRIPCION' tab and first you have to select the day and hour range where you want to see the load, and then navigate through the map in order to see the distribution of passenger load in the Valle de Aburrá.
 
 #Aquí debería haber otro screenshot de la primera ventana señalando las horas y día.
 
-If you want to make a prediction of the load you have to go the prediction section and select the hour and day from which you want to make it. 
+If you want to make a prediction of the load you have to go the 'PREDICCIÓN' tab and select the hour and day from which you want to make it. 
 
 #Aquí otro screenshot de la segunda ventana (la de predicciones) y señalando dónde se debe poner la hora y día de predicción.
-
-## Screenshots
-
-![demo.png](demo.png)
 
 
 ## Credits
 
 This application was developed by DS4A Team 75:
 
-* Andrés Rodriguez. e-mail: arrm.1996@gmail.com
-* Julián García. e-mail: 
+* Andrés Rodriguez. linkedin page: https://www.linkedin.com/in/andguez 
+* Julián García. linkedin page:  
 * Ronald Morales. e-mail: 
 * Juan Chica. e-mail:
 * Sebastien Lozano. e-mail: 
