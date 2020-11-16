@@ -1,4 +1,4 @@
-# AMVAPP Dashboard
+# ABURRAPP Dashboard
 
 ## Table of contents
 * [About this app](#About-this-app)
@@ -73,7 +73,7 @@ You can run the app on your browser at http://127.0.0.1:8050
 
 ## How to use
 
-When opening the app on the browser, the first thing you should do is press the information button located in the upper right part of the interface.
+When opening the app on the browser, the first thing you should do is press the 'proyect tab0 located in the upper left part of the interface.
 
 #Aquí debería ir un screenshot de la app indicando el botón de información.
 
@@ -95,9 +95,9 @@ If you want to make a prediction of the load you have to go the prediction secti
 This application was developed by DS4A Team 75:
 
 * Andrés Rodriguez. e-mail: arrm.1996@gmail.com
-* Julián García. e-mail:
+* Julián García. e-mail: 
 * Ronald Morales. e-mail: 
 * Juan Chica. e-mail:
 * Sebastien Lozano. e-mail: 
 * Rafael Machado. e-mail: 
-* José Cárdenas. e-mail:
+* José Cárdenas. e-mail: jcardenas0719@gmail.com
