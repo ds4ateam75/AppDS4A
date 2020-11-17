@@ -25,7 +25,7 @@ app = dash.Dash(
                 "content": "width=device-width"}],
     suppress_callback_exceptions=True
 )
-app.title = 'AmvApp'
+app.title = 'AburrApp'
 server = app.server
 linkedin_urls = [
     'https://www.linkedin.com/in/julianlgarciap/',
@@ -499,19 +499,19 @@ def build_tab_3():
                                 dcc.Graph(id="histogram-prediccion"),
                             ],
                         ),
-                        html.Div(
-                            className="div-for-dropdown",
-                            children = [html.P('Ingrese la fecha que desea revisar'),
-                                dcc.DatePickerRange(
-                                    id="date-picker-prediccion",
-                                    min_date_allowed='2020-05-10',
-                                    max_date_allowed='2020-05-11',
-                                    start_date='2020-04-01',
-                                    end_date='2020-05-11',                                    display_format="MMMM D, YYYY",
-                                    style={'backgroud': 'blue'},
-                                )
-                            ],
-                        ),
+#                        html.Div(
+#                            className="div-for-dropdown",
+#                            children = [html.P('Ingrese la fecha que desea revisar'),
+#                                dcc.DatePickerRange(
+#                                    id="date-picker-prediccion",
+#                                    min_date_allowed='2020-05-10',
+#                                    max_date_allowed='2020-05-11',
+#                                    start_date='2020-04-01',
+#                                    end_date='2020-05-11',                                    display_format="MMMM D, YYYY",
+#                                    style={'backgroud': 'blue'},
+#                                )
+#                            ],
+#                        ),
                         # Change to side-by-side for mobile layout
                         html.Div(
                             className="row",
@@ -526,9 +526,11 @@ def build_tab_3():
                                                 {"label": dia, "value": idx}
                                                 for idx, dia in enumerate(['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'])
                                             ],
-                                            multi=True,
+                                            multi=False,
+                                            value = 5,
                                             placeholder="Dia",
-                                            searchable=True
+                                            searchable=True,
+                                            clearable=False
                                         )
                                     ],
                                 ),
@@ -545,8 +547,10 @@ def build_tab_3():
                                                 }
                                                 for value in hour_label.keys()
                                             ],
-                                            multi=True,
+                                            multi=False,
+                                            value = 18,
                                             placeholder="Hora del dia",
+                                            clearable=False
                                         )
                                     ],
                                 ),
@@ -558,7 +562,7 @@ def build_tab_3():
                 html.Div(
                     className="eight columns div-for-charts bg-white",
                     children=[
-                        dcc.Graph(id="map-graph-prediccion",animate=True),
+                        dcc.Graph(id="map-graph-prediccion"),
                         dcc.Markdown(
                             className='Map-text',
                             children=(
@@ -762,36 +766,43 @@ def update_map_descripcion(start_date, end_date, day_selected, hour_picked, agr_
 @app.callback(
     Output("map-graph-prediccion", "figure"),
     [
-        Input("date-picker-prediccion", "start_date"),
-        Input("date-picker-prediccion", "end_date"),
+#        Input("date-picker-prediccion", "start_date"),
+#        Input("date-picker-prediccion", "end_date"),
         Input("day-selector-prediccion", "value"),
         Input("hour-selector-prediccion", "value")
     ],
 )
-def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
+def update_map_prediccion(day_selected, hour_picked):
     zoom = 10.0
     latInitial = 6.2259489
     lonInitial = -75.6119972
     bearing = 0
 
     """import data"""
-    PrediccionQuery = Prediccion_query(update_map=True)
-    PrediccionQuery.add_date_range(start_date, end_date)
-    if (day_selected != None):
-        PrediccionQuery.add_day_filter(day_selected[:1])
-    else:
-        PrediccionQuery.add_day_filter([4])
-    if (hour_picked) != None:
-        PrediccionQuery.add_hour_filter(hour_picked[:1])
-    else:
-        PrediccionQuery.add_hour_filter([18])
-    PrediccionQuery.add_group()
-    df_mapa = sql.request(PrediccionQuery.query)
+    PrediccionQuerymap = Prediccion_query(update_map=True)
+    
+    
+    PrediccionQuerymap.add_day_filter(day_selected)
+
+    PrediccionQuerymap.add_hour_filter(hour_picked)
+    PrediccionQuerymap.max_filter()
+    PrediccionQuerymap.add_group()
+    df_mapa = sql.request(PrediccionQuerymap.query)
+
+
+
     
     data = df_mapa.merge(df_arcos, how='left', left_on='arco', right_on='arco')
     data.dropna(inplace=True)
     del(df_mapa)
     
+    data['log_carga'] = np.log(data['carga']+1)
+
+    data.loc[data['log_carga'] <= data['log_carga'].quantile(0.2) ,'cluster'] = 'baja'
+    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.2)) & (data['log_carga']<= data['log_carga'].quantile(0.4)),'cluster'] = 'media baja'
+    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.4)) & (data['log_carga']<= data['log_carga'].quantile(0.6)),'cluster'] = 'media'
+    data.loc[(data['log_carga'] > data['log_carga'].quantile(0.6)) & (data['log_carga']<= data['log_carga'].quantile(0.8)),'cluster'] = 'media alta'
+    data.loc[data['log_carga'] > data['log_carga'].quantile(0.8),'cluster'] = 'alta'
 
     
     color_dict ={
@@ -803,9 +814,9 @@ def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
         }
     
     df = pd.DataFrame()
-    df['text'] = '<b>Nivel de Carga: '+ data['nivel'].str.capitalize() +'</b><br><b>Carga:'+data['carga'].astype('str')+'</b>'
+    df['text'] = '<b>Nivel de Carga: '+ data['cluster'].str.capitalize() +'</b><br><b>Carga:'+data['carga'].astype('str')+'</b>'
 
-    df['carga'] = data['nivel'].apply(lambda x: color_dict[x]) 
+    df['carga'] = data['cluster'].apply(lambda x: color_dict[x]) 
     df['latitud'] = data['latitud']
     df['longitud'] = data['longitud']
     
@@ -868,24 +879,32 @@ def update_map_prediccion(start_date, end_date, day_selected, hour_picked):
     [
         Input("day-selector-prediccion", "value"),
         Input("hour-selector-prediccion", "value"),
-        Input("date-picker-prediccion","start_date"),
-        Input("date-picker-prediccion","end_date")
+#        Input("date-picker-prediccion","start_date"),
+#        Input("date-picker-prediccion","end_date")
     ],
     )
-def violin_plot( day_selected, hour_picked,start_date,end_date):
+def violin_plot( day_selected, hour_picked):
 
     PrediccionQuery = Prediccion_query(update_map=False)
 
-    if start_date and end_date:
-        PrediccionQuery.add_date_range(str(start_date), str(end_date))
-
-    PrediccionQuery.add_day_filter(day_selected)
-    PrediccionQuery.add_hour_filter(hour_picked)
-
+#    if start_date and end_date:
+#        PrediccionQuery.add_date_range(str(start_date), str(end_date))
+    if day_selected is not None: 
+        PrediccionQuery.add_day_filter(day_selected)
+    if hour_picked is not None:
+        PrediccionQuery.add_hour_filter(hour_picked)
+    
     df =Sql().request(PrediccionQuery.query) 
 
+    df['log_carga'] = np.log(df['carga']+1)
 
-    colores = ['#cc3232','#db7b2b','#e7b416','#99c140','#2dc937']
+    df.loc[df['log_carga'] <= df['log_carga'].quantile(0.2) ,'cluster'] = 'baja'
+    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.2)) & (df['log_carga']<= df['log_carga'].quantile(0.4)),'cluster'] = 'media baja'
+    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.4)) & (df['log_carga']<= df['log_carga'].quantile(0.6)),'cluster'] = 'media'
+    df.loc[(df['log_carga'] > df['log_carga'].quantile(0.6)) & (df['log_carga']<= df['log_carga'].quantile(0.8)),'cluster'] = 'media alta'
+    df.loc[df['log_carga'] > df['log_carga'].quantile(0.8),'cluster'] = 'alta'
+
+    colores = ['#cc3232','#db7b2b','#e7b416','#99c140','#2dc937'][::-1]
 
     layout = go.Layout(
         title="Clasificación de niveles de carga",
@@ -898,8 +917,8 @@ def violin_plot( day_selected, hour_picked,start_date,end_date):
     fig = go.Figure(layout = layout)
     
 
-    for nivel,color in zip(['baja','media baja','media','media alta','alta'],colores[::-1]):
-        fig.add_trace(go.Violin(y=df['carga'][df['nivel']==nivel],
+    for nivel,color in zip(['baja','media baja','media','media alta','alta'],colores):
+        fig.add_trace(go.Violin(y=df['carga'][df['cluster']==nivel],
                                 name = nivel,
                                 legendgroup = nivel,
                                 line_color=color))

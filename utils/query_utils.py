@@ -99,20 +99,24 @@ class Prediccion_query:
     def add_hour_filter(self, hour=None):
         if self.number_filters == 0 and (hour is not None and hour != []):
             self.query += ' WHERE '
-            self.query += 'HORA IN {} '.format(str(hour).replace("[", "(").replace("]", ")"))
+            self.query += 'HORA = {} '.format(hour)
         elif hour is not None and hour != []:
             self.query += 'AND '
-            self.query += 'HORA IN {} '.format(str(hour).replace("[", "(").replace("]", ")"))
+            self.query += 'HORA = {} '.format(hour)
         self.number_filters += 1
 
     def add_day_filter(self, dia=None):
         if self.number_filters == 0 and (dia is not None and dia != []):
             self.query += ' WHERE '
-            self.query += 'DIA IN {} '.format(str([x for x in dia]).replace("[", "(").replace("]", ")"))
+            self.query += 'DIA = {} '.format(dia)
         elif dia is not None and dia != []:
             self.query += 'AND '
-            self.query += 'DIA IN {} '.format(str([x for x in dia]).replace("[", "(").replace("]", ")"))
+            self.query += 'DIA = {} '.format(dia)
         self.number_filters += 1
+        
+    def max_filter(self):
+        self.query += ' AND '
+        self.query += ' FECHA IN ( SELECT MAX(FECHA) FROM PREDICCION GROUP BY FECHA) '
         
     def add_group(self):
         self.query += 'GROUP BY ARCO, HORA, DIA'
